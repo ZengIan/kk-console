@@ -1,5 +1,5 @@
 // 节点设置 — 完整工具栏 + 表格(主机名/状态/SSH地址/IP/用户名/CPU架构/角色/标签/操作)
-function NodeSettings({ nodes = [], onNodesChange }) {
+function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
   const [openModal, setOpenModal] = React.useState(null); // "manual"|"upload"|"scan"|"edit"
   const [editIndex, setEditIndex] = React.useState(null);
   const [selectedRows, setSelectedRows] = React.useState(new Set()); // Set of node indices (in full list)
@@ -132,7 +132,7 @@ function NodeSettings({ nodes = [], onNodesChange }) {
           className="btn btn-ghost"
           style={{ padding: "7px 10px" }}
           title="刷新"
-          onClick={() => { setSearch(""); setCurPage(1); setSelectedRows(new Set()); }}
+          onClick={() => { setSearch(""); setCurPage(1); setSelectedRows(new Set()); onRefresh?.(); }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M13 2v4H9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>

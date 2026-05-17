@@ -276,18 +276,33 @@ function inventoryHostsToNodes(items) {
   });
 }
 
-// 持久化节点到 Inventory(静默 upsert, promise=false 不触发 host-check)
+// 持久化节点到 Inventory(upsert，同时将已删除的 host 显式置 null)
 async function saveNodesToInventory(nodes) {
-  if (!nodes.length) return;
   const inv = buildInventory(nodes);
-  const patch = { spec: inv.spec };
+
   try {
+    // 先拉当前 Inventory，算出被删除的 host 名，merge patch 需要显式置 null 才能删除
+    let removedHosts = {};
+    try {
+      const cur = await window.kkApi.getInventory("default", "default");
+      const curHostNames = Object.keys(cur?.spec?.hosts || {});
+      const newHostNames = new Set(Object.keys(inv.spec.hosts));
+      curHostNames.forEach((name) => {
+        if (!newHostNames.has(name)) removedHosts[name] = null;
+      });
+    } catch (_) { /* 404 时忽略 */ }
+
+    const patch = {
+      spec: {
+        ...inv.spec,
+        hosts: { ...inv.spec.hosts, ...removedHosts },
+      },
+    };
     await window.kkApi.patchInventory("default", "default", patch, { promise: false, type: "merge" });
   } catch (e) {
     if (String(e.message).includes("404") || String(e.message).toLowerCase().includes("not found")) {
-      await window.kkApi.createInventory(inv);
+      if (nodes.length) await window.kkApi.createInventory(inv);
     }
-    // 其他错误静默忽略,不影响 UI
   }
 }
 
@@ -422,7 +437,11 @@ function App() {
 
           {step === 0 && (
             <>
-              <NodeSettings nodes={nodes} onNodesChange={setNodes} />
+              <NodeSettings
+                nodes={nodes}
+                onNodesChange={setNodes}
+                onRefresh={() => loadNodesFromInventory().then((loaded) => { setNodes(loaded); window.showToast?.("节点列表已刷新", "success"); })}
+              />
               <ClusterForm saveRef={clusterSaveRef} />
 
               {/* Precheck 失败详情 */}

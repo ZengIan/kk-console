@@ -153,11 +153,28 @@ function ClusterForm({ saveRef }) {
           />
         </div>
       ) : (
-        <YamlPreview
-          yaml={yaml}
-          onChange={onYamlChange}
-          clusterName={values?.kubernetes?.cluster_name || activeName.replace(/\.json$/, "")}
-        />
+        <div className="config-card">
+          <textarea
+            value={yaml}
+            onChange={(e) => onYamlChange(e.target.value)}
+            spellCheck={false}
+            style={{
+              width: "100%",
+              minHeight: 360,
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: 13,
+              lineHeight: 1.6,
+              padding: 12,
+              border: "1px solid var(--border, #e5e7eb)",
+              borderRadius: 8,
+              background: "var(--bg-secondary, #f9fafb)",
+              color: "var(--text-primary, #111827)",
+              resize: "vertical",
+              outline: "none",
+              whiteSpace: "pre",
+            }}
+          />
+        </div>
       )}
 
       {saveError && (

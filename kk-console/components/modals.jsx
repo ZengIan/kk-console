@@ -395,23 +395,13 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
         const resp = await window.kkApi.preCheckHosts(hosts);
         const list = Array.isArray(resp) ? resp : (resp.items || []);
         const st = {};
-        const factsMap = {};
         list.forEach((r) => {
           const ip = r.address || r.ip;
           const ok = ["ok", "succeeded", "reachable", "success"].includes(String(r.status).toLowerCase());
           st[ip] = ok ? "ok" : "error";
-          if (ok) factsMap[ip] = { hostname: r.hostname, arch: r.arch, os: r.os };
         });
         toCheck.forEach((ip) => { if (!st[ip]) st[ip] = "error"; });
         setVerifyStatus((prev) => ({ ...prev, ...st }));
-        // Patch results with hostname/arch/OS gathered during verification
-        if (Object.keys(factsMap).length) {
-          setResults((prev) => (prev || []).map((r) => {
-            const ip = r.address || r.ip;
-            const f = factsMap[ip];
-            return f ? { ...r, hostname: f.hostname || r.hostname, arch: f.arch || r.arch, os: f.os || r.os } : r;
-          }));
-        }
 
         const failCount = Object.values(st).filter((v) => v === "error").length;
         if (failCount > 0) {

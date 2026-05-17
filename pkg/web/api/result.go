@@ -182,9 +182,11 @@ type IPTable struct {
 	SSHPort       string `json:"sshPort"`       // SSH port
 	Localhost     bool   `json:"localhost"`     // Whether the IP is a localhost IP
 	SSHReachable  bool   `json:"sshReachable"`  // Whether SSH port is reachable on this IP
-	SSHAuthorized bool   `json:"sshAuthorized"` // Whether SSH is authorized for this IP
+	SSHAuthorized bool   `json:"sshAuthorized"` // Whether SSH is authorized via local key
 	Added         bool   `json:"added"`         // Indicates whether this IP has already been added to the inventory
 	Hostname      string `json:"hostname"`      // Hostname retrieved via SSH when authorized
+	Arch          string `json:"arch"`          // CPU architecture (amd64/arm64) retrieved via SSH
+	OS            string `json:"os"`            // OS pretty name retrieved via SSH
 }
 
 // IPHostCheckData represents an IP address entry and its SSH connect data information.
@@ -202,6 +204,8 @@ type IPHostCheckResult struct {
 	SSHPort  string `json:"sshPort"`
 	Status   string `json:"status"`
 	Hostname string `json:"hostname"` // Hostname retrieved via SSH when connection succeeds
+	Arch     string `json:"arch"`     // CPU architecture (amd64/arm64)
+	OS       string `json:"os"`       // OS pretty name
 }
 
 // SchemaFile2Table converts a SchemaFile and its filename into a SchemaTable structure.

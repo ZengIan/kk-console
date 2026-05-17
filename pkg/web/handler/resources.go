@@ -247,7 +247,7 @@ func (h ResourceHandler) ListIP(request *restful.Request, response *restful.Resp
 				if !isIPOnline(ip) {
 					continue
 				}
-				reachable, authorized, hostname := isSSHAuthorized(ip, sshPort)
+				reachable, authorized, facts := isSSHAuthorized(ip, sshPort)
 
 				mu.Lock()
 				ipTable = append(ipTable, api.IPTable{
@@ -256,7 +256,9 @@ func (h ResourceHandler) ListIP(request *restful.Request, response *restful.Resp
 					SSHReachable:  reachable,
 					SSHAuthorized: authorized,
 					Added:         added,
-					Hostname:      hostname,
+					Hostname:      facts.Hostname,
+					Arch:          facts.Arch,
+					OS:            facts.OS,
 				})
 				mu.Unlock()
 			}
@@ -575,17 +577,38 @@ func isValidICMPReply(n int, reply []byte, src net.Addr, expectedIP net.IP, prot
 	return false
 }
 
-// ===========================================================================
-// =============================   isSSHAuthorized   =========================
-// ===========================================================================
+
+
+// hostFacts holds facts gathered from a remote host via SSH.
+type hostFacts struct {
+	Hostname string
+	Arch     string
+	OS       string
+}
+
+// gatherHostFacts runs lightweight commands over an open SSH connection to collect hostname, arch and OS.
+func gatherHostFacts(client *ssh.Client) hostFacts {
+	hostname := strings.TrimSpace(runSSHCommand(client, "hostname"))
+	rawArch := strings.TrimSpace(runSSHCommand(client, "uname -m"))
+	arch := rawArch
+	switch rawArch {
+	case "x86_64":
+		arch = "amd64"
+	case "aarch64":
+		arch = "arm64"
+	}
+	osPretty := strings.TrimSpace(runSSHCommand(client,
+		`grep PRETTY_NAME /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"'`))
+	return hostFacts{Hostname: hostname, Arch: arch, OS: osPretty}
+}
 
 // isSSHAuthorized checks if SSH authorization to the given IP is possible using the local private key.
-// It returns reachable, authorized, and the remote hostname (empty if not authorized).
-func isSSHAuthorized(ipStr, sshPort string) (bool, bool, string) {
+// It also gathers host facts when the connection succeeds.
+func isSSHAuthorized(ipStr, sshPort string) (reachable, authorized bool, facts hostFacts) {
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ipStr, sshPort), time.Second)
 	if err != nil {
 		klog.V(4).InfoS("port not reachable", "port", sshPort, "ip", ipStr, "error", err)
-		return false, false, ""
+		return false, false, facts
 	}
 	defer conn.Close()
 
@@ -598,19 +621,19 @@ func isSSHAuthorized(ipStr, sshPort string) (bool, bool, string) {
 
 	if _, err := os.Stat(sshPrivateKey); err != nil {
 		klog.V(4).InfoS("private key file not found", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false, ""
+		return true, false, facts
 	}
 
 	key, err := os.ReadFile(sshPrivateKey)
 	if err != nil {
 		klog.V(4).InfoS("cannot read private key", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false, ""
+		return true, false, facts
 	}
 
 	privateKey, err := ssh.ParsePrivateKey(key)
 	if err != nil {
 		klog.V(4).InfoS("cannot parse private key", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false, ""
+		return true, false, facts
 	}
 
 	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(ipStr, sshPort), &ssh.ClientConfig{
@@ -621,12 +644,11 @@ func isSSHAuthorized(ipStr, sshPort string) (bool, bool, string) {
 	})
 	if err != nil {
 		klog.V(4).InfoS("SSH connection failed", "ip", ipStr, "error", err)
-		return true, false, ""
+		return true, false, facts
 	}
 	defer sshClient.Close()
 
-	hostname := runSSHCommand(sshClient, "hostname")
-	return true, true, strings.TrimSpace(hostname)
+	return true, true, gatherHostFacts(sshClient)
 }
 
 // runSSHCommand runs a single command on an established SSH client and returns stdout output.
@@ -642,11 +664,11 @@ func runSSHCommand(client *ssh.Client, cmd string) string {
 	return buf.String()
 }
 
-func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent string) (bool, bool, string) {
+func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent string) (reachable, authorized bool, facts hostFacts) {
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ipStr, sshPort), time.Second)
 	if err != nil {
 		klog.V(4).InfoS("port not reachable", "port", sshPort, "ip", ipStr, "error", err)
-		return false, false, ""
+		return false, false, facts
 	}
 	defer conn.Close()
 
@@ -700,18 +722,12 @@ func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent strin
 	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(ipStr, sshPort), config)
 	if err != nil {
 		klog.V(4).InfoS("SSH connection failed", "error", err)
-		return true, false, ""
+		return true, false, facts
 	}
 	defer sshClient.Close()
 
-	hostname := runSSHCommand(sshClient, "hostname")
-	if hostname == "" {
-		klog.V(4).InfoS("SSH command execution failed", "ip", ipStr)
-		return true, false, ""
-	}
-
 	klog.V(4).InfoS("SSH connection successful", "user", sshUser)
-	return true, true, strings.TrimSpace(hostname)
+	return true, true, gatherHostFacts(sshClient)
 }
 
 func findSSHPrivateKeys() []string {
@@ -769,10 +785,10 @@ func (h ResourceHandler) PreCheckHost(request *restful.Request, response *restfu
 			if currentHost.SSHUser == "" {
 				status = _const.SSHVerifyStatusSSHIncomplete
 			}
-			var hostname string
+			var facts hostFacts
 			if status == "" {
 				var reachable, authorized bool
-				reachable, authorized, hostname = checkSSHConnect(currentHost.IP, currentHost.SSHPort,
+				reachable, authorized, facts = checkSSHConnect(currentHost.IP, currentHost.SSHPort,
 					currentHost.SSHUser, currentHost.SSHPwd, currentHost.SSHPrivateKeyContent)
 				klog.V(4).InfoS("check ssh connect result", "ip", currentHost.IP, "port", currentHost.SSHPort, "reachable", reachable, "authorized", authorized)
 				switch {
@@ -796,7 +812,9 @@ func (h ResourceHandler) PreCheckHost(request *restful.Request, response *restfu
 				IP:       currentHost.IP,
 				SSHPort:  currentHost.SSHPort,
 				Status:   status,
-				Hostname: hostname,
+				Hostname: facts.Hostname,
+				Arch:     facts.Arch,
+				OS:       facts.OS,
 			}
 		}(i, host)
 	}

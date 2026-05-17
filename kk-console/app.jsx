@@ -440,7 +440,34 @@ function App() {
               <NodeSettings
                 nodes={nodes}
                 onNodesChange={setNodes}
-                onRefresh={() => loadNodesFromInventory().then((loaded) => { setNodes(loaded); window.showToast?.("节点列表已刷新", "success"); })}
+                onRefresh={async () => {
+                  const loaded = await loadNodesFromInventory();
+                  setNodes(loaded);
+                  if (!loaded.length) { window.showToast?.("节点列表已刷新", "success"); return; }
+                  // 用保存的凭据重新验证 SSH 连接并更新状态
+                  try {
+                    const hosts = loaded.map((n) => ({
+                      ip: n.address, sshPort: String(n.port || 22),
+                      sshUser: n.user || "root",
+                      sshPwd: n.password || "",
+                      sshPrivateKeyContent: n.privateKey || "",
+                    }));
+                    const resp = await window.kkApi.preCheckHosts(hosts);
+                    const list = Array.isArray(resp) ? resp : (resp.items || []);
+                    const statusMap = {};
+                    list.forEach((r) => {
+                      const ip = r.address || r.ip;
+                      const ok = ["ok", "succeeded", "reachable", "success"].includes(String(r.status).toLowerCase());
+                      statusMap[ip] = ok ? "ok" : "error";
+                    });
+                    setNodes((prev) => prev.map((n) => statusMap[n.address] != null ? { ...n, status: statusMap[n.address] } : n));
+                    const failCount = Object.values(statusMap).filter((v) => v === "error").length;
+                    if (failCount > 0) window.showToast?.(`${failCount} 个节点 SSH 连接失败`, "error");
+                    else window.showToast?.("节点列表已刷新，所有节点 SSH 连接正常", "success");
+                  } catch (e) {
+                    window.showToast?.("节点连接验证失败", "error", e.message);
+                  }
+                }}
               />
               <ClusterForm saveRef={clusterSaveRef} />
 

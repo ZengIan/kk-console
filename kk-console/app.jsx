@@ -441,12 +441,21 @@ function App() {
                 nodes={nodes}
                 onNodesChange={setNodes}
                 onRefresh={async () => {
-                  const loaded = await loadNodesFromInventory();
-                  setNodes(loaded);
-                  if (!loaded.length) { window.showToast?.("节点列表已刷新", "success"); return; }
+                  // 从 Inventory 加载节点，但若返回空则保留当前状态（防止未保存时误清空）
+                  let nodeList = nodes;
+                  try {
+                    const loaded = await loadNodesFromInventory();
+                    if (loaded.length > 0) {
+                      nodeList = loaded;
+                      setNodes(loaded);
+                    }
+                  } catch (e) {
+                    // 加载失败，保留当前节点
+                  }
+                  if (!nodeList.length) { window.showToast?.("节点列表已刷新", "success"); return; }
                   // 用保存的凭据重新验证 SSH 连接并更新状态
                   try {
-                    const hosts = loaded.map((n) => ({
+                    const hosts = nodeList.map((n) => ({
                       ip: n.address, sshPort: String(n.port || 22),
                       sshUser: n.user || "root",
                       sshPwd: n.password || "",

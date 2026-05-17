@@ -414,18 +414,20 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
       ips.forEach((ip) => { next[ip] = prev[ip] === "ok" ? "ok" : "pending"; });
       return next;
     });
-    // 只对尚未授权的节点发起验证
+    // 用户输入了凭据时验证所有节点；否则只验证非预授权节点
+    const hasCredentials = authUser && authSecret;
     const toCheck = ips.filter((ip) => {
+      if (hasCredentials) return true;
       const r = (results || []).find((x) => (x.ip || x.address) === ip);
       return !r?.sshAuthorized;
     });
     try {
       if (toCheck.length) {
         const hosts = toCheck.map((ip) => ({
-          address: ip,
-          port: Number(scanPort),
-          user: authUser,
-          ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
+          ip,
+          sshPort: String(scanPort),
+          sshUser: authUser,
+          ...(authMethod === "password" ? { sshPwd: authSecret } : { sshPrivateKeyContent: authSecret }),
         }));
         const resp = await window.kkApi.preCheckHosts(hosts);
         const list = Array.isArray(resp) ? resp : (resp.items || []);
@@ -436,6 +438,13 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
           st[ip] = ok ? "ok" : "error";
         });
         toCheck.forEach((ip) => { if (!st[ip]) st[ip] = "error"; });
+        // 未进入 toCheck 的预授权节点直接标为 ok
+        ips.forEach((ip) => {
+          if (!st[ip]) {
+            const r = (results || []).find((x) => (x.ip || x.address) === ip);
+            st[ip] = r?.sshAuthorized ? "ok" : "error";
+          }
+        });
         setVerifyStatus((prev) => ({ ...prev, ...st }));
 
         const failCount = Object.values(st).filter((v) => v === "error").length;
@@ -710,39 +719,37 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
           <div className="form-row">
             <div className="form-row-label required">SSH 认证</div>
             <div className="form-row-control">
-              {/* 已预授权提示 */}
-              {activeNode && (results || []).find((x) => (x.ip || x.address) === activeNode)?.sshAuthorized ? (
+              {/* 预授权提示（不隐藏输入框，仅作提示） */}
+              {activeNode && (results || []).find((x) => (x.ip || x.address) === activeNode)?.sshAuthorized && (
                 <div style={{
                   display: "flex", alignItems: "flex-start", gap: 10,
-                  padding: "10px 14px", background: "#1e293b", color: "#f1f5f9",
-                  borderRadius: 8, fontSize: 13, lineHeight: 1.5,
+                  padding: "8px 12px", background: "#eff6ff", color: "#1e40af",
+                  borderRadius: 6, fontSize: 12, lineHeight: 1.5, marginBottom: 10,
+                  border: "1px solid #bfdbfe",
                 }}>
-                  <svg style={{ flexShrink: 0, marginTop: 2, color: "#60a5fa" }} width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <svg style={{ flexShrink: 0, marginTop: 2 }} width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
                     <path d="M8 7v4M8 5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
-                  该节点已通过 SSH 密钥预授权，无需手动输入认证信息
+                  该节点已通过 SSH 密钥预授权，可直接验证；也可填写密码或密钥进行覆盖
+                </div>
+              )}
+              <div className="choice-group" style={{ marginBottom: 12 }}>
+                <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
+                <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+              </div>
+              {authMethod === "password" ? (
+                <div className="password-input">
+                  <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 密码（预授权节点可留空）" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+                  <span className="eye" onClick={() => setShowPwd((s) => !s)}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                    </svg>
+                  </span>
                 </div>
               ) : (
-                <>
-                  <div className="choice-group" style={{ marginBottom: 12 }}>
-                    <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
-                    <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
-                  </div>
-                  {authMethod === "password" ? (
-                    <div className="password-input">
-                      <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 密码" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
-                      <span className="eye" onClick={() => setShowPwd((s) => !s)}>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
-                          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
-                        </svg>
-                      </span>
-                    </div>
-                  ) : (
-                    <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
-                  )}
-                </>
+                <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥（PEM 格式，预授权节点可留空）" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
               )}
             </div>
           </div>

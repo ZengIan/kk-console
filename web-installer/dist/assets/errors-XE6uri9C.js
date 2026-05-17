@@ -1,0 +1,1 @@
+const t="网络错误",o="请求超时",e={"app.actions.retry":"重试","app.title":"出了点问题",networkError:t,"notFound.actions.back":"返回首页","notFound.title":"404 - 页面不存在",requestTimeout:o,"route.title":"发生意外错误"};export{e as default,t as networkError,o as requestTimeout};

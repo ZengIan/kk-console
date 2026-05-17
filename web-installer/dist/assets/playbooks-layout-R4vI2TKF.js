@@ -1,1 +1,0 @@
-import{c as r,j as c}from"./index-CfdlEQ-8.js";function n(e){const t=r.c(2),{children:o}=e;let s;return t[0]!==o?(s=c.jsx("div",{className:"pt-[32px]",children:o}),t[0]=o,t[1]=s):s=t[1],s}export{n as P};

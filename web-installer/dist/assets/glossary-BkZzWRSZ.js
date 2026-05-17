@@ -1,1 +1,0 @@
-const e={"brand.ks.abbr":"KS","brand.ks.full":"KubeSphere","legal.qingcloud.copyright":"Copyright © 2025, QingCloud Technologies Corp. All Rights Reserved. 北京青云科技集团股份有限公司","term.namespace":"命名空间"};export{e as default};

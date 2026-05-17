@@ -28,7 +28,6 @@ function Modal({ title, onClose, footer, size, children }) {
 }
 
 // ============ 手动添加节点 ============
-// onAdd(host) — 确认后回调,host 为节点对象
 function ManualAddModal({ onClose, onAdd }) {
   const [hostname, setHostname] = React.useState("");
   const [ipVersion, setIpVersion] = React.useState("ipv4");
@@ -58,12 +57,12 @@ function ManualAddModal({ onClose, onAdd }) {
       arch,
       port: Number(sshPort),
       user: sshUser,
+      status: "ok",
       ...(authMethod === "password" ? { password } : { privateKey: password }),
     };
     setLoading(true);
     setError(null);
     try {
-      // SSH 预检: 确认连通性
       await window.kkApi.preCheckHosts([{
         address: sshHost || ip,
         port: Number(sshPort),
@@ -93,51 +92,26 @@ function ManualAddModal({ onClose, onAdd }) {
 
   return (
     <Modal title="手动添加" onClose={onClose} footer={footer}>
-      {/* 主机名 */}
       <div className="form-row">
         <div className="form-row-label required">主机名</div>
         <div className="form-row-control">
-          <input
-            className="input"
-            placeholder="请输入主机名"
-            value={hostname}
-            onChange={(e) => setHostname(e.target.value)}
-          />
-          <p className="form-row-hint">
-            主机名只能包含字母、数字、连字符(-)和点(.),必须以字母或数字开头和结尾,最长 64 个字符。
-          </p>
+          <input className="input" placeholder="请输入主机名" value={hostname} onChange={(e) => setHostname(e.target.value)} />
+          <p className="form-row-hint">主机名只能包含字母、数字、连字符(-)和点(.),必须以字母或数字开头和结尾,最长 64 个字符。</p>
         </div>
       </div>
 
-      {/* IP 地址 */}
       <div className="form-row">
         <div className="form-row-label required">IP 地址</div>
         <div className="form-row-control">
           <div className="choice-group" style={{ marginBottom: 12 }}>
-            <button
-              className={`choice-btn ${ipVersion === "ipv4" ? "active" : ""}`}
-              onClick={() => setIpVersion("ipv4")}
-            >
-              IPv4
-            </button>
-            <button
-              className={`choice-btn ${ipVersion === "ipv6" ? "active" : ""}`}
-              onClick={() => setIpVersion("ipv6")}
-            >
-              IPv6
-            </button>
+            <button className={`choice-btn ${ipVersion === "ipv4" ? "active" : ""}`} onClick={() => setIpVersion("ipv4")}>IPv4</button>
+            <button className={`choice-btn ${ipVersion === "ipv6" ? "active" : ""}`} onClick={() => setIpVersion("ipv6")}>IPv6</button>
           </div>
           {ipVersion === "ipv4" ? (
             <div className="ip-input">
               {octets.map((v, i) => (
                 <React.Fragment key={i}>
-                  <input
-                    className="ip-octet"
-                    value={v}
-                    onChange={setOctet(i)}
-                    placeholder=""
-                    maxLength={3}
-                  />
+                  <input className="ip-octet" value={v} onChange={setOctet(i)} maxLength={3} />
                   {i < 3 && <span className="ip-dot">·</span>}
                 </React.Fragment>
               ))}
@@ -149,113 +123,57 @@ function ManualAddModal({ onClose, onAdd }) {
         </div>
       </div>
 
-      {/* 节点角色 */}
       <div className="form-row">
         <div className="form-row-label">节点角色</div>
         <div className="form-row-control">
           <div className="choice-group">
-            {[
-              { v: "master", l: "Master" },
-              { v: "worker", l: "Worker" },
-              { v: "both", l: "Master & Worker" },
-            ].map((o) => (
-              <button
-                key={o.v}
-                className={`choice-btn ${role === o.v ? "active" : ""}`}
-                onClick={() => setRole(o.v)}
-              >
-                {o.l}
-              </button>
+            {[{ v: "master", l: "Master" }, { v: "worker", l: "Worker" }, { v: "both", l: "Master & Worker" }].map((o) => (
+              <button key={o.v} className={`choice-btn ${role === o.v ? "active" : ""}`} onClick={() => setRole(o.v)}>{o.l}</button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* CPU 架构 */}
       <div className="form-row">
         <div className="form-row-label">CPU 架构</div>
         <div className="form-row-control">
           <div className="choice-group">
-            {[
-              { v: "amd64", l: "AMD64" },
-              { v: "arm64", l: "ARM64" },
-            ].map((o) => (
-              <button
-                key={o.v}
-                className={`choice-btn ${arch === o.v ? "active" : ""}`}
-                onClick={() => setArch(o.v)}
-              >
-                {o.l}
-              </button>
+            {[{ v: "amd64", l: "AMD64" }, { v: "arm64", l: "ARM64" }].map((o) => (
+              <button key={o.v} className={`choice-btn ${arch === o.v ? "active" : ""}`} onClick={() => setArch(o.v)}>{o.l}</button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* SSH 地址 */}
       <div className="form-row">
         <div className="form-row-label">SSH 地址</div>
         <div className="form-row-control">
           <div className="host-port">
-            <input
-              className="input"
-              placeholder="请输入 IP 地址"
-              value={sshHost}
-              onChange={(e) => setSshHost(e.target.value)}
-            />
+            <input className="input" placeholder="请输入 IP 地址" value={sshHost} onChange={(e) => setSshHost(e.target.value)} />
             <span className="sep">:</span>
-            <input
-              className="input port-input"
-              type="number"
-              value={sshPort}
-              onChange={(e) => setSshPort(e.target.value)}
-            />
+            <input className="input port-input" type="number" value={sshPort} onChange={(e) => setSshPort(e.target.value)} />
           </div>
         </div>
       </div>
 
-      {/* SSH 用户名 */}
       <div className="form-row">
         <div className="form-row-label">SSH 用户名</div>
         <div className="form-row-control">
-          <input
-            className="input"
-            value={sshUser}
-            onChange={(e) => setSshUser(e.target.value)}
-          />
-          <p className="form-row-hint">
-            SSH 用户名只能包含字母、数字、连字符(-),最长 32 个字符。
-          </p>
+          <input className="input" value={sshUser} onChange={(e) => setSshUser(e.target.value)} />
+          <p className="form-row-hint">SSH 用户名只能包含字母、数字、连字符(-),最长 32 个字符。</p>
         </div>
       </div>
 
-      {/* SSH 认证 */}
       <div className="form-row">
         <div className="form-row-label">SSH 认证</div>
         <div className="form-row-control">
           <div className="choice-group" style={{ marginBottom: 12 }}>
-            <button
-              className={`choice-btn ${authMethod === "password" ? "active" : ""}`}
-              onClick={() => setAuthMethod("password")}
-            >
-              密码
-            </button>
-            <button
-              className={`choice-btn ${authMethod === "key" ? "active" : ""}`}
-              onClick={() => setAuthMethod("key")}
-            >
-              密钥
-            </button>
+            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
+            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
           </div>
           {authMethod === "password" ? (
             <div className="password-input">
-              <input
-                className="input"
-                type={showPwd ? "text" : "password"}
-                placeholder="请输入 SSH 认证密码"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 认证密码" value={password} onChange={(e) => setPassword(e.target.value)} />
               <span className="eye" onClick={() => setShowPwd((s) => !s)}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
@@ -264,33 +182,19 @@ function ManualAddModal({ onClose, onAdd }) {
               </span>
             </div>
           ) : (
-            <textarea
-              className="input"
-              rows="4"
-              placeholder="请粘贴 SSH 私钥(PEM 格式)"
-              style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <textarea className="input" rows="4" placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={password} onChange={(e) => setPassword(e.target.value)} />
           )}
         </div>
       </div>
 
-      {/* 标签 */}
       <div className="form-row" style={{ marginBottom: 4 }}>
         <div className="form-row-label">标签</div>
         <div className="form-row-control">
-          <span className="add-link">
-            <Icons.Plus /> 添加标签
-          </span>
+          <span className="add-link"><Icons.Plus /> 添加标签</span>
         </div>
       </div>
 
-      {error && (
-        <div style={{ marginTop: 8, color: "var(--danger, #ef4444)", fontSize: 13 }}>
-          {error}
-        </div>
-      )}
+      {error && <div style={{ marginTop: 8, color: "var(--danger)", fontSize: 13 }}>{error}</div>}
     </Modal>
   );
 }
@@ -327,25 +231,39 @@ function FileUploadModal({ onClose }) {
         <svg className="dropzone-icon" width="36" height="36" viewBox="0 0 36 36" fill="none">
           <path d="M18 24V8M12 14l6-6 6 6M6 28v4h24v-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        <p className="dropzone-main">
-          拖拽文件到此处,或 <span className="link">点击上传</span>
-        </p>
+        <p className="dropzone-main">拖拽文件到此处,或 <span className="link">点击上传</span></p>
         <p className="dropzone-hint">仅支持 CSV 格式,最多 1 个文件,文件大小不超过 5 MB</p>
       </div>
     </Modal>
   );
 }
 
-// ============ 节点扫描 ============
-// onAdd(hosts[]) — 确认后回调,传入选中节点数组
+// ============ 节点扫描 (2步: 选择节点 → SSH认证) ============
 function NodeScanModal({ onClose, onAdd }) {
+  const [step, setStep] = React.useState("select"); // "select" | "auth"
+
+  // 扫描输入
   const [octets, setOctets] = React.useState(["", "", "", ""]);
-  const [endRange, setEndRange] = React.useState("");
-  const [port, setPort] = React.useState(22);
+  const [scanPort, setScanPort] = React.useState(22);
   const [scanning, setScanning] = React.useState(false);
-  const [results, setResults] = React.useState(null);
+  const [scanError, setScanError] = React.useState(null);
+  const [results, setResults] = React.useState(null); // null=未扫描
+
+  // 选择
+  const [search, setSearch] = React.useState("");
   const [selected, setSelected] = React.useState(new Set());
-  const [error, setError] = React.useState(null);
+  const [curPage, setCurPage] = React.useState(1);
+  const PAGE_SIZE = 10;
+
+  // SSH认证
+  const [activeNode, setActiveNode] = React.useState(null);
+  const [authUser, setAuthUser] = React.useState("root");
+  const [authMethod, setAuthMethod] = React.useState("password");
+  const [authSecret, setAuthSecret] = React.useState("");
+  const [showPwd, setShowPwd] = React.useState(false);
+  const [verifying, setVerifying] = React.useState(false);
+  const [verifyStatus, setVerifyStatus] = React.useState({}); // { ip: "ok"|"error"|"pending" }
+  const [authError, setAuthError] = React.useState(null);
 
   const setOctet = (i) => (e) => {
     const v = e.target.value.replace(/\D/g, "").slice(0, 3);
@@ -353,24 +271,31 @@ function NodeScanModal({ onClose, onAdd }) {
   };
 
   const handleScan = async () => {
+    if (!octets.slice(0, 3).every(Boolean)) return;
     const [a, b, c] = octets;
-    if (!octets.every(Boolean)) return;
-    // 始终用 /24 网段扫描,endRange 仅供参考展示
     const cidr = `${a}.${b}.${c}.0/24`;
     setScanning(true);
-    setError(null);
-    setResults(null);
+    setScanError(null);
     setSelected(new Set());
+    setResults(null);
     try {
-      const data = await window.kkApi.scanIP({ cidr, sshPort: Number(port) });
+      const data = await window.kkApi.scanIP({ cidr, sshPort: Number(scanPort) });
       const list = Array.isArray(data) ? data : (data.items || []);
       setResults(list);
+      setCurPage(1);
     } catch (e) {
-      setError(`扫描失败: ${e.message}`);
+      setScanError(`扫描失败: ${e.message}`);
     } finally {
       setScanning(false);
     }
   };
+
+  const filteredResults = (results || []).filter((r) => {
+    const ip = r.address || r.ip || "";
+    return !search || ip.includes(search);
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
+  const pageItems = filteredResults.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
 
   const toggleSelect = (ip) => {
     setSelected((prev) => {
@@ -380,132 +305,462 @@ function NodeScanModal({ onClose, onAdd }) {
     });
   };
 
-  const handleConfirm = () => {
-    const hosts = (results || [])
-      .filter((r) => selected.has(r.address || r.ip))
-      .map((r) => ({
-        name: (r.address || r.ip).replace(/\./g, "-"),
-        address: r.address || r.ip,
-        role: "worker",
-        arch: "amd64",
-        port: Number(port),
-        user: "root",
+  const allSelected = filteredResults.length > 0 && filteredResults.every((r) => selected.has(r.address || r.ip));
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredResults.map((r) => r.address || r.ip)));
+    }
+  };
+
+  const goToAuth = () => {
+    const ips = [...selected];
+    setActiveNode(ips[0] || null);
+    setVerifyStatus({});
+    setAuthError(null);
+    setStep("auth");
+  };
+
+  const handleVerify = async () => {
+    const ips = [...selected];
+    setVerifying(true);
+    setAuthError(null);
+    const init = {};
+    ips.forEach((ip) => (init[ip] = "pending"));
+    setVerifyStatus(init);
+    try {
+      const hosts = ips.map((ip) => ({
+        address: ip,
+        port: Number(scanPort),
+        user: authUser,
+        ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
       }));
-    onAdd?.(hosts);
+      const resp = await window.kkApi.preCheckHosts(hosts);
+      const list = Array.isArray(resp) ? resp : (resp.items || []);
+      const st = {};
+      list.forEach((r) => {
+        const ip = r.address || r.ip;
+        const ok = ["ok", "succeeded", "reachable", "success"].includes(String(r.status).toLowerCase());
+        st[ip] = ok ? "ok" : "error";
+      });
+      ips.forEach((ip) => { if (!st[ip]) st[ip] = "error"; });
+      setVerifyStatus(st);
+    } catch (e) {
+      setAuthError(`验证失败: ${e.message}`);
+      const st = {};
+      ips.forEach((ip) => (st[ip] = "error"));
+      setVerifyStatus(st);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleAuthConfirm = () => {
+    const nodes = [...selected].map((ip) => {
+      const r = (results || []).find((x) => (x.address || x.ip) === ip) || {};
+      return {
+        name: r.hostname || ip.replace(/\./g, "-"),
+        address: ip,
+        port: Number(scanPort),
+        user: authUser,
+        arch: r.arch || "amd64",
+        role: "",
+        status: "ok",
+        ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
+      };
+    });
+    onAdd?.(nodes);
     onClose();
   };
 
-  const canScan = octets.every(Boolean) && !scanning;
-  const canConfirm = selected.size > 0;
+  // ---- Step: 选择节点 ----
+  if (step === "select") {
+    const selectFooter = (
+      <>
+        <button className="btn btn-ghost" onClick={onClose}>取消</button>
+        <button className="btn btn-primary" disabled={selected.size === 0} onClick={goToAuth}>
+          选择节点
+        </button>
+      </>
+    );
 
-  const footer = (
+    return (
+      <Modal title="选择节点" onClose={onClose} footer={selectFooter} size="lg">
+        <div className="info-banner" style={{ marginBottom: 20 }}>
+          <p className="info-banner-title">节点认证说明</p>
+          <p className="info-banner-text">
+            如果已设置节点 SSH 认证为免密,则可直接完成节点的添加;如未设置节点 SSH 认证为免密,则需要完成节点 SSH 认证设置方可完成节点的添加。
+          </p>
+        </div>
+
+        {/* 扫描输入(未扫描时显示) */}
+        {results === null && !scanning && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <div className="ip-input" style={{ flex: 1 }}>
+                {octets.map((v, i) => (
+                  <React.Fragment key={i}>
+                    <input className="ip-octet" value={v} onChange={setOctet(i)} maxLength={3} placeholder="" />
+                    {i < 3 && <span className="ip-dot">·</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+              <span style={{ color: "var(--text-secondary)", fontSize: 13, whiteSpace: "nowrap" }}>SSH 端口</span>
+              <input className="input" style={{ width: 72 }} value={scanPort} onChange={(e) => setScanPort(e.target.value)} />
+              <button className="btn btn-primary" onClick={handleScan} disabled={!octets.slice(0, 3).every(Boolean)}>
+                扫描
+              </button>
+            </div>
+            {scanError && <div style={{ color: "var(--danger)", fontSize: 13 }}>{scanError}</div>}
+            <p className="form-row-hint" style={{ marginTop: 4 }}>请输入节点 IP 地址段,系统将扫描 /24 网段内的可用节点</p>
+          </div>
+        )}
+
+        {scanning && (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-tertiary)" }}>扫描中,请稍候...</div>
+        )}
+
+        {results !== null && (
+          <>
+            {/* 搜索 + 重新扫描 */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
+              <div style={{ position: "relative", flex: 1, maxWidth: 300 }}>
+                <svg style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M10 10l2.5 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+                <input className="input" style={{ paddingLeft: 30 }} placeholder="请输入节点名称搜索" value={search} onChange={(e) => { setSearch(e.target.value); setCurPage(1); }} />
+              </div>
+              <button className="btn btn-secondary" style={{ fontSize: 12 }} onClick={handleScan} disabled={scanning}>
+                重新扫描
+              </button>
+            </div>
+
+            {/* 表格 */}
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: "var(--bg-hover)", borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ width: 48, padding: "10px 16px", textAlign: "left" }}>
+                    <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+                  </th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 600, fontSize: 13 }}>节点 IP 地址</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageItems.length === 0 ? (
+                  <tr><td colSpan={2} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
+                ) : pageItems.map((r) => {
+                  const ip = r.address || r.ip;
+                  return (
+                    <tr key={ip} style={{ borderBottom: "1px solid var(--border-light)", cursor: "pointer" }} onClick={() => toggleSelect(ip)}>
+                      <td style={{ padding: "10px 16px" }}>
+                        <input type="checkbox" checked={selected.has(ip)} onChange={() => toggleSelect(ip)} onClick={(e) => e.stopPropagation()} />
+                      </td>
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)" }}>{ip}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* 分页 */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, marginTop: 12, fontSize: 13, color: "var(--text-secondary)" }}>
+              <span>共 {filteredResults.length} 条</span>
+              <button className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 16 }} disabled={curPage <= 1} onClick={() => setCurPage((p) => p - 1)}>‹</button>
+              <span style={{ minWidth: 24, textAlign: "center", fontWeight: 600, color: "var(--primary-600)", background: "var(--primary-50)", padding: "2px 8px", borderRadius: 4 }}>{curPage}</span>
+              <button className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 16 }} disabled={curPage >= totalPages} onClick={() => setCurPage((p) => p + 1)}>›</button>
+              <span>跳转到</span>
+              <input className="input" style={{ width: 48, textAlign: "center", padding: "4px 6px" }}
+                onKeyDown={(e) => { if (e.key === "Enter") { const n = parseInt(e.target.value); if (n >= 1 && n <= totalPages) { setCurPage(n); e.target.value = ""; } } }}
+              />
+              <span>页</span>
+            </div>
+
+            {/* 已选标签 */}
+            {selected.size > 0 && (
+              <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--bg-hover)", borderRadius: "var(--radius)", border: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>
+                  已选择 <span style={{ color: "var(--success)" }}>{selected.size}</span> 个节点
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {[...selected].map((ip) => (
+                    <span key={ip} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 10px", background: "#fff", border: "1px solid var(--border)", borderRadius: 4, fontSize: 12, fontFamily: "var(--font-mono)" }}>
+                      {ip}
+                      <span style={{ cursor: "pointer", color: "var(--text-tertiary)", marginLeft: 2 }} onClick={(e) => { e.stopPropagation(); toggleSelect(ip); }}>×</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </Modal>
+    );
+  }
+
+  // ---- Step: 节点 SSH 认证 ----
+  const selectedIps = [...selected];
+  const authFooter = (
     <>
       <button className="btn btn-ghost" onClick={onClose}>取消</button>
-      {results !== null ? (
-        <button className="btn btn-primary" onClick={handleConfirm} disabled={!canConfirm}>
-          确认添加{selected.size > 0 ? ` (${selected.size})` : ""}
-        </button>
-      ) : (
-        <button className="btn btn-primary" onClick={handleScan} disabled={!canScan}>
-          {scanning ? "扫描中..." : "开始扫描"}
-        </button>
-      )}
+      <button className="btn btn-secondary" onClick={() => { setStep("select"); setVerifyStatus({}); }}>上一步</button>
+      <button className="btn btn-primary" onClick={handleAuthConfirm}>确认</button>
     </>
   );
 
   return (
-    <Modal title="节点扫描" onClose={onClose} footer={footer} size="lg">
-      <div className="form-row" style={{ gridTemplateColumns: "1fr", gap: 12 }}>
-        <div className="form-row-label" style={{ paddingTop: 0, fontWeight: 600 }}>
-          节点 IP 地址
-        </div>
-        <div className="form-row-control">
-          <div className="cidr-range">
-            {octets.map((v, i) => (
-              <React.Fragment key={i}>
-                <input
-                  className="ip-octet"
-                  value={v}
-                  onChange={setOctet(i)}
-                  maxLength={3}
-                />
-                {i < 3 && <span className="ip-dot">·</span>}
-              </React.Fragment>
-            ))}
-            <span className="ip-tilde">~</span>
-            <input
-              className="ip-octet"
-              value={endRange}
-              onChange={(e) => setEndRange(e.target.value.replace(/\D/g, "").slice(0, 3))}
-              maxLength={3}
-            />
-            <span className="ip-dot">:</span>
-            <input
-              className="ip-octet"
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
-            />
-          </div>
-          <p className="form-row-hint">
-            请输入节点 IP 地址段和 SSH 端口,系统将扫描 /24 网段内的可用节点
-          </p>
-        </div>
+    <Modal title="节点 SSH 认证" onClose={onClose} footer={authFooter} size="lg">
+      <div className="info-banner" style={{ marginBottom: 16 }}>
+        <p className="info-banner-text" style={{ margin: 0 }}>
+          <svg style={{ display: "inline", verticalAlign: "middle", marginRight: 6, color: "var(--primary-500)" }} width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.3"/>
+            <path d="M7 6.5v3M7 4.5v.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+          </svg>
+          已选择的节点中存在需要 SSH 认证的节点,需要完成节点 SSH 认证设置方可完成节点的添加,填写完认证信息后,请先完成"一键验证",然后点击"确定"按钮,即可完成节点添加。
+        </p>
       </div>
 
-      {error && (
-        <div style={{ color: "var(--danger, #ef4444)", fontSize: 13, marginBottom: 12 }}>
-          {error}
-        </div>
-      )}
+      <button className="btn btn-primary" style={{ marginBottom: 20 }} onClick={handleVerify} disabled={verifying}>
+        {verifying ? "验证中..." : "一键验证"}
+      </button>
 
-      {scanning && (
-        <div style={{ textAlign: "center", color: "var(--text-tertiary)", padding: "24px 0" }}>
-          扫描中,请稍候...
-        </div>
-      )}
+      {authError && <div style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12 }}>{authError}</div>}
 
-      {results !== null && results.length === 0 && (
-        <div style={{ textAlign: "center", color: "var(--text-tertiary)", padding: "24px 0" }}>
-          未发现可用节点
+      <div style={{ display: "flex", gap: 16, minHeight: 260 }}>
+        {/* 左: 节点列表 */}
+        <div style={{ width: 200, flexShrink: 0, border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+          {selectedIps.map((ip) => {
+            const st = verifyStatus[ip];
+            const isActive = activeNode === ip;
+            return (
+              <div
+                key={ip}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8, padding: "10px 14px",
+                  cursor: "pointer", fontSize: 13, borderBottom: "1px solid var(--border-light)",
+                  background: isActive ? "var(--primary-50)" : "transparent",
+                  transition: "background 0.12s",
+                }}
+                onClick={() => setActiveNode(ip)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: "var(--text-secondary)", flexShrink: 0 }}>
+                  <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M5 13v1.5M11 13v1.5M3.5 14.5h9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+                <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ip}</span>
+                {st === "ok"      && <span style={{ color: "var(--success)", fontSize: 16, flexShrink: 0 }}>✓</span>}
+                {st === "error"   && <span style={{ color: "var(--danger)",  fontSize: 14, flexShrink: 0 }}>✗</span>}
+                {st === "pending" && <span style={{ color: "var(--text-tertiary)", fontSize: 11, flexShrink: 0 }}>…</span>}
+              </div>
+            );
+          })}
         </div>
-      )}
 
-      {results !== null && results.length > 0 && (
-        <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse", marginTop: 8 }}>
-          <thead>
-            <tr style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}>
-              <th style={{ width: 32, padding: "6px 8px", textAlign: "left" }}></th>
-              <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 500 }}>IP</th>
-              <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 500 }}>状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((r) => {
-              const ip = r.address || r.ip;
-              const ok = r.status === "ok" || r.status === "reachable";
-              return (
-                <tr key={ip} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "6px 8px" }}>
-                    <input
-                      type="checkbox"
-                      checked={selected.has(ip)}
-                      onChange={() => toggleSelect(ip)}
-                    />
-                  </td>
-                  <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)" }}>{ip}</td>
-                  <td style={{ padding: "6px 8px", color: ok ? "var(--success, #22c55e)" : "var(--text-tertiary)" }}>
-                    {r.status || "可用"}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+        {/* 右: SSH 表单 */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="form-row">
+            <div className="form-row-label required">SSH 地址</div>
+            <div className="form-row-control">
+              <div className="host-port">
+                <input className="input" value={activeNode || ""} disabled style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }} />
+                <span className="sep">:</span>
+                <input className="input port-input" value={scanPort} disabled style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-row-label required">SSH 用户名</div>
+            <div className="form-row-control">
+              <input className="input" value={authUser} onChange={(e) => setAuthUser(e.target.value)} />
+              <p className="form-row-hint">SSH 用户名仅支持字母、数字、连接符 (-),最多 32 个字符</p>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-row-label required">SSH 认证</div>
+            <div className="form-row-control">
+              <div className="choice-group" style={{ marginBottom: 12 }}>
+                <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
+                <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+              </div>
+              {authMethod === "password" ? (
+                <div className="password-input">
+                  <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 密码" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+                  <span className="eye" onClick={() => setShowPwd((s) => !s)}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                    </svg>
+                  </span>
+                </div>
+              ) : (
+                <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </Modal>
   );
 }
 
+// ============ 编辑节点 ============
+function EditNodeModal({ node, onClose, onConfirm }) {
+  const [hostname, setHostname] = React.useState(node?.name || "");
+  const [ipVersion, setIpVersion] = React.useState("ipv4");
+  const [octets, setOctets] = React.useState(() => {
+    const parts = (node?.address || "").split(".");
+    return [...parts, "", "", "", ""].slice(0, 4);
+  });
+  const [role, setRole] = React.useState(node?.role || "");
+  const [arch, setArch] = React.useState(node?.arch || "amd64");
+  const [sshHost, setSshHost] = React.useState(node?.address || "");
+  const [sshPort, setSshPort] = React.useState(node?.port || 22);
+  const [sshUser, setSshUser] = React.useState(node?.user || "root");
+  const [authMethod, setAuthMethod] = React.useState(node?.privateKey ? "key" : "password");
+  const [authSecret, setAuthSecret] = React.useState(node?.password || node?.privateKey || "");
+  const [showPwd, setShowPwd] = React.useState(false);
+
+  const setOctet = (i) => (e) => {
+    const v = e.target.value.replace(/\D/g, "").slice(0, 3);
+    setOctets((arr) => arr.map((x, idx) => (idx === i ? v : x)));
+  };
+
+  const handleConfirm = () => {
+    const ip = ipVersion === "ipv4" ? octets.join(".") : (node?.address || "");
+    onConfirm({
+      ...node,
+      name: hostname,
+      address: ip,
+      port: Number(sshPort),
+      user: sshUser,
+      arch,
+      role,
+      ...(authMethod === "password"
+        ? { password: authSecret, privateKey: undefined }
+        : { privateKey: authSecret, password: undefined }),
+    });
+    onClose();
+  };
+
+  const footer = (
+    <>
+      <button className="btn btn-ghost" onClick={onClose}>取消</button>
+      <button className="btn btn-primary" onClick={handleConfirm} disabled={!hostname}>确认</button>
+    </>
+  );
+
+  return (
+    <Modal title="编辑节点" onClose={onClose} footer={footer}>
+      <div className="form-row">
+        <div className="form-row-label required">主机名</div>
+        <div className="form-row-control">
+          <input className="input" value={hostname} onChange={(e) => setHostname(e.target.value)} />
+          <p className="form-row-hint">主机名只能包含字母、数字、连字符(-)和点(.),必须以字母或数字开头和结尾,最长 64 个字符。</p>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label required">IP 地址</div>
+        <div className="form-row-control">
+          <div className="choice-group" style={{ marginBottom: 12 }}>
+            <button className={`choice-btn ${ipVersion === "ipv4" ? "active" : ""}`} onClick={() => setIpVersion("ipv4")}>IPv4</button>
+            <button className={`choice-btn ${ipVersion === "ipv6" ? "active" : ""}`} onClick={() => setIpVersion("ipv6")}>IPv6</button>
+          </div>
+          {ipVersion === "ipv4" ? (
+            <div className="ip-input">
+              {octets.map((v, i) => (
+                <React.Fragment key={i}>
+                  <input className="ip-octet" value={v} onChange={setOctet(i)} maxLength={3} />
+                  {i < 3 && <span className="ip-dot">·</span>}
+                </React.Fragment>
+              ))}
+            </div>
+          ) : (
+            <input className="input" placeholder="请输入 IPv6 地址" defaultValue={ipVersion === "ipv6" ? node?.address : ""} />
+          )}
+          <p className="form-row-hint">IP 地址范围应在 0.0.0.0 到 255.255.255.255。</p>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">节点角色</div>
+        <div className="form-row-control">
+          <div className="choice-group">
+            {[{ v: "master", l: "Master" }, { v: "worker", l: "Worker" }, { v: "both", l: "Master & Worker" }].map((o) => (
+              <button key={o.v} className={`choice-btn ${role === o.v ? "active" : ""}`} onClick={() => setRole(o.v)}>{o.l}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">CPU 架构</div>
+        <div className="form-row-control">
+          <div className="choice-group">
+            {[{ v: "amd64", l: "AMD64" }, { v: "arm64", l: "ARM64" }].map((o) => (
+              <button key={o.v} className={`choice-btn ${arch === o.v ? "active" : ""}`} onClick={() => setArch(o.v)}>{o.l}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">SSH 地址</div>
+        <div className="form-row-control">
+          <div className="host-port">
+            <input className="input" value={sshHost} onChange={(e) => setSshHost(e.target.value)} />
+            <span className="sep">:</span>
+            <input className="input port-input" type="number" value={sshPort} onChange={(e) => setSshPort(e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">SSH 用户名</div>
+        <div className="form-row-control">
+          <input className="input" value={sshUser} onChange={(e) => setSshUser(e.target.value)} />
+          <p className="form-row-hint">SSH 用户名只能包含字母、数字、连字符(-),最长 32 个字符。</p>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">SSH 认证</div>
+        <div className="form-row-control">
+          <div className="choice-group" style={{ marginBottom: 12 }}>
+            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
+            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+          </div>
+          {authMethod === "password" ? (
+            <div className="password-input">
+              <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 认证密码" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+              <span className="eye" onClick={() => setShowPwd((s) => !s)}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                  <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                </svg>
+              </span>
+            </div>
+          ) : (
+            <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+          )}
+        </div>
+      </div>
+
+      <div className="form-row" style={{ marginBottom: 4 }}>
+        <div className="form-row-label">标签</div>
+        <div className="form-row-control">
+          <span style={{ color: "var(--primary-500)", cursor: "pointer", fontSize: 13 }}>+ 添加标签</span>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+window.Modal = Modal;
 window.ManualAddModal = ManualAddModal;
 window.FileUploadModal = FileUploadModal;
 window.NodeScanModal = NodeScanModal;
+window.EditNodeModal = EditNodeModal;

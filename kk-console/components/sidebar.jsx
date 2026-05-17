@@ -3,7 +3,7 @@ function Sidebar({ currentStep = 0, onSelect }) {
   const steps = [
   {
     label: "基本信息",
-    desc: "配置节点、集群、网络和镜像仓库的设置",
+    desc: "配置节点、容器、网络和镜像仓库等",
     icon: <Icons.StepBasic />
   },
   {
@@ -27,12 +27,12 @@ function Sidebar({ currentStep = 0, onSelect }) {
     <aside className="sidebar">
       <div className="logo">
         <Icons.Logo />
-        <span className="logo-text">KK CONSOLE</span>
+        <span className="logo-text">企业级人工智能平台部署</span>
       </div>
 
       <div className="version-badge">
         <Icons.VersionDot />
-        版本 v4.2.0
+        版本 v2.0.0
       </div>
 
       <h2 className="sidebar-title">安装向导</h2>

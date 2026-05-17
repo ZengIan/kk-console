@@ -421,13 +421,13 @@ function NodeScanModal({ onClose, onAdd }) {
               <textarea
                 className="input"
                 rows={4}
-                placeholder={"请输入节点 IP 地址，每行一个，支持 CIDR 格式\n例如：\n192.168.1.10\n10.0.0.0/24"}
+                placeholder=""
                 value={ipText}
                 onChange={(e) => setIpText(e.target.value)}
-                style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 13, resize: "vertical" }}
+                style={{ width: 420, fontFamily: "var(--font-mono)", fontSize: 13, resize: "vertical" }}
               />
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0, alignSelf: "flex-start" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ color: "var(--text-secondary)", fontSize: 13, whiteSpace: "nowrap" }}>SSH 端口</span>
                   <input className="input" style={{ width: 72 }} value={scanPort} onChange={(e) => setScanPort(e.target.value)} />
                 </div>
@@ -435,6 +435,11 @@ function NodeScanModal({ onClose, onAdd }) {
                   扫描
                 </button>
               </div>
+            </div>
+            <div style={{ color: "var(--text-tertiary)", fontSize: 12, lineHeight: 1.6, marginBottom: 8 }}>
+              请输入节点 IP 地址，每行一个，支持 CIDR 格式<br />
+              例如：192.168.1.10<br />
+              10.0.0.0/24
             </div>
             {scanError && <div style={{ color: "var(--danger)", fontSize: 13 }}>{scanError}</div>}
           </div>

@@ -112,7 +112,7 @@ html, body {
 
 .content {
   flex: 1;
-  padding: 32px 56px 96px;
+  padding: 32px 56px 32px;
   max-width: 1600px;
   width: 100%;
 }
@@ -663,11 +663,11 @@ html, body {
 .yaml-textarea::-webkit-scrollbar { width: 12px; height: 12px; }
 .yaml-textarea::-webkit-scrollbar-track { background: #0a0e15; }
 .yaml-textarea::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #ffffff;
   border-radius: 6px;
   border: 3px solid #0a0e15;
 }
-.yaml-textarea::-webkit-scrollbar-thumb:hover { background: #475569; }
+.yaml-textarea::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
 
 /* ============ Modal 弹框 ============ */
 .modal-mask {

@@ -243,7 +243,7 @@ function NodeScanModal({ onClose, onAdd }) {
   const [step, setStep] = React.useState("select"); // "select" | "auth"
 
   // 扫描输入
-  const [octets, setOctets] = React.useState(["", "", "", ""]);
+  const [ipText, setIpText] = React.useState(""); // 多行粘贴，每行一个 IP
   const [scanPort, setScanPort] = React.useState(22);
   const [scanning, setScanning] = React.useState(false);
   const [scanError, setScanError] = React.useState(null);
@@ -265,23 +265,43 @@ function NodeScanModal({ onClose, onAdd }) {
   const [verifyStatus, setVerifyStatus] = React.useState({}); // { ip: "ok"|"error"|"pending" }
   const [authError, setAuthError] = React.useState(null);
 
-  const setOctet = (i) => (e) => {
-    const v = e.target.value.replace(/\D/g, "").slice(0, 3);
-    setOctets((arr) => arr.map((x, idx) => (idx === i ? v : x)));
+  // 解析多行 IP 文本，支持 IP 或 IP/CIDR
+  const parseIpText = (text) => {
+    return text.split(/[\n,；;]+/)
+      .map((s) => s.trim())
+      .filter((s) => /^[\d.:/]+$/.test(s));
   };
 
   const handleScan = async () => {
-    if (!octets.slice(0, 3).every(Boolean)) return;
-    const [a, b, c] = octets;
-    const cidr = `${a}.${b}.${c}.0/24`;
+    const ips = parseIpText(ipText);
+    if (!ips.length) {
+      setScanError("请输入至少一个 IP 地址");
+      return;
+    }
     setScanning(true);
     setScanError(null);
     setSelected(new Set());
     setResults(null);
     try {
-      const data = await window.kkApi.scanIP({ cidr, sshPort: Number(scanPort) });
-      const list = Array.isArray(data) ? data : (data.items || []);
-      setResults(list);
+      // 对每个条目：若是 CIDR 调 scanIP，单 IP 直接作为结果
+      const all = [];
+      for (const entry of ips) {
+        if (entry.includes("/")) {
+          const data = await window.kkApi.scanIP({ cidr: entry, sshPort: Number(scanPort) });
+          const list = Array.isArray(data) ? data : (data.items || []);
+          all.push(...list);
+        } else {
+          all.push({ address: entry, ip: entry });
+        }
+      }
+      // 去重
+      const seen = new Set();
+      setResults(all.filter((r) => {
+        const ip = r.address || r.ip;
+        if (seen.has(ip)) return false;
+        seen.add(ip);
+        return true;
+      }));
       setCurPage(1);
     } catch (e) {
       setScanError(`扫描失败: ${e.message}`);
@@ -397,23 +417,26 @@ function NodeScanModal({ onClose, onAdd }) {
         {/* 扫描输入(未扫描时显示) */}
         {results === null && !scanning && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <div className="ip-input" style={{ flex: 1 }}>
-                {octets.map((v, i) => (
-                  <React.Fragment key={i}>
-                    <input className="ip-octet" value={v} onChange={setOctet(i)} maxLength={3} placeholder="" />
-                    {i < 3 && <span className="ip-dot">·</span>}
-                  </React.Fragment>
-                ))}
+            <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "flex-start" }}>
+              <textarea
+                className="input"
+                rows={4}
+                placeholder={"请输入节点 IP 地址，每行一个，支持 CIDR 格式\n例如：\n192.168.1.10\n10.0.0.0/24"}
+                value={ipText}
+                onChange={(e) => setIpText(e.target.value)}
+                style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 13, resize: "vertical" }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ color: "var(--text-secondary)", fontSize: 13, whiteSpace: "nowrap" }}>SSH 端口</span>
+                  <input className="input" style={{ width: 72 }} value={scanPort} onChange={(e) => setScanPort(e.target.value)} />
+                </div>
+                <button className="btn btn-primary" onClick={handleScan} disabled={!ipText.trim() || scanning}>
+                  扫描
+                </button>
               </div>
-              <span style={{ color: "var(--text-secondary)", fontSize: 13, whiteSpace: "nowrap" }}>SSH 端口</span>
-              <input className="input" style={{ width: 72 }} value={scanPort} onChange={(e) => setScanPort(e.target.value)} />
-              <button className="btn btn-primary" onClick={handleScan} disabled={!octets.slice(0, 3).every(Boolean)}>
-                扫描
-              </button>
             </div>
             {scanError && <div style={{ color: "var(--danger)", fontSize: 13 }}>{scanError}</div>}
-            <p className="form-row-hint" style={{ marginTop: 4 }}>请输入节点 IP 地址段,系统将扫描 /24 网段内的可用节点</p>
           </div>
         )}
 
@@ -432,8 +455,8 @@ function NodeScanModal({ onClose, onAdd }) {
                 </svg>
                 <input className="input" style={{ paddingLeft: 30 }} placeholder="请输入节点名称搜索" value={search} onChange={(e) => { setSearch(e.target.value); setCurPage(1); }} />
               </div>
-              <button className="btn btn-secondary" style={{ fontSize: 12 }} onClick={handleScan} disabled={scanning}>
-                重新扫描
+              <button className="btn btn-secondary" style={{ fontSize: 12 }} onClick={() => { setResults(null); setScanError(null); }} disabled={scanning}>
+                重新输入
               </button>
             </div>
 

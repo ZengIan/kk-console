@@ -81,7 +81,7 @@ function NodeSettings({ nodes = [], onNodesChange }) {
         </div>
         {openModal === "manual" && <ManualAddModal onClose={() => setOpenModal(null)} onAdd={addNodes} />}
         {openModal === "upload" && <FileUploadModal onClose={() => setOpenModal(null)} />}
-        {openModal === "scan"   && <NodeScanModal   onClose={() => setOpenModal(null)} onAdd={addNodes} />}
+        {openModal === "scan"   && <NodeScanModal   onClose={() => setOpenModal(null)} onAdd={addNodes} existingNodes={nodes} />}
       </section>
     );
   }

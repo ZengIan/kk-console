@@ -250,7 +250,7 @@ function FileUploadModal({ onClose }) {
 }
 
 // ============ 节点扫描 (2步: 选择节点 → SSH认证) ============
-function NodeScanModal({ onClose, onAdd }) {
+function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
   const [step, setStep] = React.useState("select"); // "select" | "auth"
 
   // 扫描输入
@@ -333,17 +333,30 @@ function NodeScanModal({ onClose, onAdd }) {
     });
   };
 
-  const allSelected = filteredResults.length > 0 && filteredResults.every((r) => selected.has(r.address || r.ip));
+  const selectableResults = filteredResults.filter((r) => {
+    const ip = r.address || r.ip;
+    return !((r.added || r.Added) || existingNodes.some((n) => n.address === ip));
+  });
+  const allSelected = selectableResults.length > 0 && selectableResults.every((r) => selected.has(r.address || r.ip));
   const toggleAll = () => {
     if (allSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(filteredResults.map((r) => r.address || r.ip)));
+      setSelected(new Set(selectableResults.map((r) => r.address || r.ip)));
     }
   };
 
   const goToAuth = () => {
     const ips = [...selected];
+    // 二次校验：已存在的 IP 不允许进入下一步
+    const dupIps = ips.filter((ip) =>
+      existingNodes.some((n) => n.address === ip) ||
+      (results || []).find((r) => (r.ip || r.address) === ip && (r.added || r.Added))
+    );
+    if (dupIps.length) {
+      window.showToast?.(`以下 IP 已添加，请取消勾选后再继续：\n${dupIps.join("\n")}`, "error");
+      return;
+    }
     setActiveNode(ips[0] || null);
     setAuthError(null);
     // 扫描结果中已预授权的节点直接标为 ok
@@ -520,7 +533,7 @@ function NodeScanModal({ onClose, onAdd }) {
                   <tr><td colSpan={4} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
                 ) : pageItems.map((r) => {
                   const ip = r.address || r.ip;
-                  const alreadyAdded = !!(r.added || r.Added);
+                  const alreadyAdded = !!(r.added || r.Added) || existingNodes.some((n) => n.address === ip);
                   const hostname = r.hostname || ip.replace(/\./g, "-");
                   return (
                     <tr

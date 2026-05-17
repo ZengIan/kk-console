@@ -28,7 +28,8 @@ function Modal({ title, onClose, footer, size, children }) {
 }
 
 // ============ 手动添加节点 ============
-function ManualAddModal({ onClose }) {
+// onAdd(host) — 确认后回调,host 为节点对象
+function ManualAddModal({ onClose, onAdd }) {
   const [hostname, setHostname] = React.useState("");
   const [ipVersion, setIpVersion] = React.useState("ipv4");
   const [octets, setOctets] = React.useState(["", "", "", ""]);
@@ -40,16 +41,53 @@ function ManualAddModal({ onClose }) {
   const [authMethod, setAuthMethod] = React.useState("password");
   const [password, setPassword] = React.useState("");
   const [showPwd, setShowPwd] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   const setOctet = (i) => (e) => {
     const v = e.target.value.replace(/\D/g, "").slice(0, 3);
     setOctets((arr) => arr.map((x, idx) => (idx === i ? v : x)));
   };
 
+  const handleConfirm = async () => {
+    const ip = octets.join(".");
+    const host = {
+      name: hostname,
+      address: ip,
+      role,
+      arch,
+      port: Number(sshPort),
+      user: sshUser,
+      ...(authMethod === "password" ? { password } : { privateKey: password }),
+    };
+    setLoading(true);
+    setError(null);
+    try {
+      // SSH 预检: 确认连通性
+      await window.kkApi.preCheckHosts([{
+        address: sshHost || ip,
+        port: Number(sshPort),
+        user: sshUser,
+        password: authMethod === "password" ? password : undefined,
+        privateKey: authMethod === "key" ? password : undefined,
+      }]);
+      onAdd?.(host);
+      onClose();
+    } catch (e) {
+      setError(`SSH 预检失败: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const canConfirm = hostname && octets.every(Boolean) && !loading;
+
   const footer = (
     <>
       <button className="btn btn-ghost" onClick={onClose}>取消</button>
-      <button className="btn btn-primary">确认</button>
+      <button className="btn btn-primary" onClick={handleConfirm} disabled={!canConfirm}>
+        {loading ? "检测中..." : "确认"}
+      </button>
     </>
   );
 
@@ -231,6 +269,8 @@ function ManualAddModal({ onClose }) {
               rows="4"
               placeholder="请粘贴 SSH 私钥(PEM 格式)"
               style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           )}
         </div>
@@ -245,6 +285,12 @@ function ManualAddModal({ onClose }) {
           </span>
         </div>
       </div>
+
+      {error && (
+        <div style={{ marginTop: 8, color: "var(--danger, #ef4444)", fontSize: 13 }}>
+          {error}
+        </div>
+      )}
     </Modal>
   );
 }
@@ -291,20 +337,79 @@ function FileUploadModal({ onClose }) {
 }
 
 // ============ 节点扫描 ============
-function NodeScanModal({ onClose }) {
+// onAdd(hosts[]) — 确认后回调,传入选中节点数组
+function NodeScanModal({ onClose, onAdd }) {
   const [octets, setOctets] = React.useState(["", "", "", ""]);
   const [endRange, setEndRange] = React.useState("");
   const [port, setPort] = React.useState(22);
+  const [scanning, setScanning] = React.useState(false);
+  const [results, setResults] = React.useState(null);
+  const [selected, setSelected] = React.useState(new Set());
+  const [error, setError] = React.useState(null);
 
   const setOctet = (i) => (e) => {
     const v = e.target.value.replace(/\D/g, "").slice(0, 3);
     setOctets((arr) => arr.map((x, idx) => (idx === i ? v : x)));
   };
 
+  const handleScan = async () => {
+    const [a, b, c] = octets;
+    if (!octets.every(Boolean)) return;
+    // 始终用 /24 网段扫描,endRange 仅供参考展示
+    const cidr = `${a}.${b}.${c}.0/24`;
+    setScanning(true);
+    setError(null);
+    setResults(null);
+    setSelected(new Set());
+    try {
+      const data = await window.kkApi.scanIP({ cidr, sshPort: Number(port) });
+      const list = Array.isArray(data) ? data : (data.items || []);
+      setResults(list);
+    } catch (e) {
+      setError(`扫描失败: ${e.message}`);
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const toggleSelect = (ip) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(ip) ? next.delete(ip) : next.add(ip);
+      return next;
+    });
+  };
+
+  const handleConfirm = () => {
+    const hosts = (results || [])
+      .filter((r) => selected.has(r.address || r.ip))
+      .map((r) => ({
+        name: (r.address || r.ip).replace(/\./g, "-"),
+        address: r.address || r.ip,
+        role: "worker",
+        arch: "amd64",
+        port: Number(port),
+        user: "root",
+      }));
+    onAdd?.(hosts);
+    onClose();
+  };
+
+  const canScan = octets.every(Boolean) && !scanning;
+  const canConfirm = selected.size > 0;
+
   const footer = (
     <>
       <button className="btn btn-ghost" onClick={onClose}>取消</button>
-      <button className="btn btn-primary" disabled>开始扫描</button>
+      {results !== null ? (
+        <button className="btn btn-primary" onClick={handleConfirm} disabled={!canConfirm}>
+          确认添加{selected.size > 0 ? ` (${selected.size})` : ""}
+        </button>
+      ) : (
+        <button className="btn btn-primary" onClick={handleScan} disabled={!canScan}>
+          {scanning ? "扫描中..." : "开始扫描"}
+        </button>
+      )}
     </>
   );
 
@@ -342,10 +447,61 @@ function NodeScanModal({ onClose }) {
             />
           </div>
           <p className="form-row-hint">
-            请输入 CIDR 格式的节点 IP 地址段和 SSH 端口,系统将扫描可用节点
+            请输入节点 IP 地址段和 SSH 端口,系统将扫描 /24 网段内的可用节点
           </p>
         </div>
       </div>
+
+      {error && (
+        <div style={{ color: "var(--danger, #ef4444)", fontSize: 13, marginBottom: 12 }}>
+          {error}
+        </div>
+      )}
+
+      {scanning && (
+        <div style={{ textAlign: "center", color: "var(--text-tertiary)", padding: "24px 0" }}>
+          扫描中,请稍候...
+        </div>
+      )}
+
+      {results !== null && results.length === 0 && (
+        <div style={{ textAlign: "center", color: "var(--text-tertiary)", padding: "24px 0" }}>
+          未发现可用节点
+        </div>
+      )}
+
+      {results !== null && results.length > 0 && (
+        <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse", marginTop: 8 }}>
+          <thead>
+            <tr style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}>
+              <th style={{ width: 32, padding: "6px 8px", textAlign: "left" }}></th>
+              <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 500 }}>IP</th>
+              <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 500 }}>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((r) => {
+              const ip = r.address || r.ip;
+              const ok = r.status === "ok" || r.status === "reachable";
+              return (
+                <tr key={ip} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "6px 8px" }}>
+                    <input
+                      type="checkbox"
+                      checked={selected.has(ip)}
+                      onChange={() => toggleSelect(ip)}
+                    />
+                  </td>
+                  <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)" }}>{ip}</td>
+                  <td style={{ padding: "6px 8px", color: ok ? "var(--success, #22c55e)" : "var(--text-tertiary)" }}>
+                    {r.status || "可用"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </Modal>
   );
 }

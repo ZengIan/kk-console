@@ -134,3 +134,132 @@ storage_class:
 window.parseYaml = parseYaml;
 window.yamlToForm = yamlToForm;
 window.formToYaml = formToYaml;
+
+// ============ YAML 语法高亮 + 行号编辑器 ============
+function escHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function highlightYamlValue(val) {
+  const t = val.trim();
+  if (!t) return escHtml(val);
+  if (/^(~|null|Null|NULL)$/.test(t))
+    return `<span style="color:#f59e0b">${escHtml(val)}</span>`;
+  if (/^(true|false|yes|no|True|False|Yes|No|TRUE|FALSE|YES|NO)$/.test(t))
+    return `<span style="color:#f59e0b">${escHtml(val)}</span>`;
+  if (/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(t) || /^0x[0-9a-fA-F]+$/.test(t))
+    return `<span style="color:#f59e0b">${escHtml(val)}</span>`;
+  if (/^["']/.test(t))
+    return `<span style="color:#34d399">${escHtml(val)}</span>`;
+  if (/^[&*]/.test(t))
+    return `<span style="color:#a78bfa">${escHtml(val)}</span>`;
+  if (/^[|>]/.test(t))
+    return `<span style="color:#94a3b8">${escHtml(val)}</span>`;
+  return `<span style="color:#e2e8f0">${escHtml(val)}</span>`;
+}
+
+function highlightYamlLine(raw) {
+  if (raw === undefined || raw === null) return " ";
+  const line = String(raw);
+  if (!line.trim()) return " ";
+
+  const indent = line.match(/^(\s*)/)[1];
+  const content = line.slice(indent.length);
+
+  // 注释
+  if (content.startsWith("#"))
+    return escHtml(indent) + `<span style="color:#6b7280;font-style:italic">${escHtml(content)}</span>`;
+
+  // 列表项标记
+  let prefix = "";
+  let rest = content;
+  if (/^-\s/.test(content) || content === "-") {
+    const dash = content.match(/^(-\s*)/)[1];
+    prefix = `<span style="color:#94a3b8">${escHtml(dash)}</span>`;
+    rest = content.slice(dash.length);
+  }
+
+  // key: value / key:
+  const m = rest.match(/^([\w.\-/]+)(\s*:\s*)(.*)$/);
+  if (m) {
+    const [, key, colon, val] = m;
+    // 行内注释
+    const ciIdx = val.indexOf(" #");
+    let valPart = val, commentPart = "";
+    if (ciIdx >= 0) {
+      valPart = val.slice(0, ciIdx);
+      commentPart = `<span style="color:#6b7280;font-style:italic">${escHtml(val.slice(ciIdx))}</span>`;
+    }
+    return (
+      escHtml(indent) +
+      prefix +
+      `<span style="color:#60a5fa">${escHtml(key)}</span>` +
+      `<span style="color:#94a3b8">${escHtml(colon)}</span>` +
+      (valPart ? highlightYamlValue(valPart) : "") +
+      commentPart
+    );
+  }
+
+  return escHtml(indent) + prefix + highlightYamlValue(rest);
+}
+
+function YamlEditor({ value, onChange }) {
+  const textareaRef = React.useRef(null);
+  const overlayRef  = React.useRef(null);
+  const gutterRef   = React.useRef(null);
+
+  const lines = (value || "").split("\n");
+
+  const syncScroll = () => {
+    if (!textareaRef.current) return;
+    const { scrollTop, scrollLeft } = textareaRef.current;
+    if (overlayRef.current) {
+      overlayRef.current.scrollTop  = scrollTop;
+      overlayRef.current.scrollLeft = scrollLeft;
+    }
+    if (gutterRef.current) {
+      gutterRef.current.style.transform = `translateY(-${scrollTop}px)`;
+    }
+  };
+
+  return (
+    <div className="yaml-code">
+      {/* 行号槽 */}
+      <div className="yaml-gutter" style={{ overflow: "hidden", minWidth: 48 }}>
+        <div ref={gutterRef} style={{ paddingTop: 14, willChange: "transform" }}>
+          {lines.map((_, i) => (
+            <div key={i} className="yaml-lineno">{i + 1}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* 编辑区 */}
+      <div className="yaml-edit-wrap">
+        {/* 高亮覆盖层 */}
+        <div className="yaml-overlay" ref={overlayRef}>
+          {lines.map((line, i) => (
+            <div
+              key={i}
+              className="yaml-line"
+              dangerouslySetInnerHTML={{ __html: highlightYamlLine(line) }}
+            />
+          ))}
+        </div>
+        {/* 透明可编辑 textarea */}
+        <textarea
+          ref={textareaRef}
+          className="yaml-textarea"
+          value={value || ""}
+          onChange={(e) => onChange?.(e.target.value)}
+          onScroll={syncScroll}
+          spellCheck={false}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+        />
+      </div>
+    </div>
+  );
+}
+
+window.YamlEditor = YamlEditor;

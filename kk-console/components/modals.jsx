@@ -27,6 +27,41 @@ function Modal({ title, onClose, footer, size, children }) {
   );
 }
 
+// ============ 通用确认弹框(危险操作) ============
+function ConfirmDialog({ title, description, confirmText = "确定", cancelText = "取消", onCancel, onConfirm }) {
+  React.useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onCancel?.();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
+  return (
+    <div className="modal-mask" onClick={onCancel}>
+      <div className="modal" style={{ width: 480, maxWidth: "90vw" }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
+          <h3 className="modal-title" style={{ visibility: "hidden" }}>{title}</h3>
+          <span className="modal-close" onClick={onCancel}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          </span>
+        </div>
+        <div className="modal-body" style={{ display: "flex", gap: 16, alignItems: "flex-start", paddingTop: 0 }}>
+          <div style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", background: "var(--danger)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 18, fontWeight: 600 }}>!</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>{title}</div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{description}</div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn" onClick={onCancel}>{cancelText}</button>
+          <button className="btn" style={{ background: "var(--danger)", color: "#fff", borderColor: "var(--danger)" }} onClick={onConfirm}>{confirmText}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============ 手动添加节点 ============
 function ManualAddModal({ onClose, onAdd }) {
   const [hostname, setHostname] = React.useState("");

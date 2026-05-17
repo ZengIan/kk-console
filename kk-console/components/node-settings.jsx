@@ -5,6 +5,8 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
   const [selectedRows, setSelectedRows] = React.useState(new Set()); // Set of node indices (in full list)
   const [search, setSearch] = React.useState("");
   const [curPage, setCurPage] = React.useState(1);
+  // 删除确认: { type: "single", idx } | { type: "batch", indices: number[] } | null
+  const [confirmDelete, setConfirmDelete] = React.useState(null);
   const PAGE_SIZE = 10;
 
   const addNodes = (newNodes) => {
@@ -12,19 +14,33 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
     onNodesChange?.([...nodes, ...list]);
   };
 
-  const removeNode = (idx) => {
-    onNodesChange?.(nodes.filter((_, i) => i !== idx));
-    setSelectedRows((prev) => {
-      const next = new Set(prev);
-      next.delete(idx);
-      return next;
-    });
-  };
+  const removeNode = (idx) => setConfirmDelete({ type: "single", idx });
 
   const removeBatch = () => {
-    const next = nodes.filter((_, i) => !selectedRows.has(i));
-    onNodesChange?.(next);
-    setSelectedRows(new Set());
+    if (!selectedRows.size) return;
+    setConfirmDelete({ type: "batch", indices: [...selectedRows] });
+  };
+
+  const doConfirmDelete = () => {
+    if (!confirmDelete) return;
+    if (confirmDelete.type === "single") {
+      const idx = confirmDelete.idx;
+      const removed = nodes[idx];
+      onNodesChange?.(nodes.filter((_, i) => i !== idx));
+      setSelectedRows((prev) => {
+        const next = new Set(prev);
+        next.delete(idx);
+        return next;
+      });
+      window.showToast?.(`节点 ${removed?.address || removed?.name || ""} 已删除`, "success");
+    } else {
+      const indices = new Set(confirmDelete.indices);
+      const next = nodes.filter((_, i) => !indices.has(i));
+      onNodesChange?.(next);
+      setSelectedRows(new Set());
+      window.showToast?.(`已删除 ${indices.size} 个节点`, "success");
+    }
+    setConfirmDelete(null);
   };
 
   const updateNode = (idx, data) => {
@@ -238,6 +254,20 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
           node={nodes[editIndex]}
           onClose={() => { setOpenModal(null); setEditIndex(null); }}
           onConfirm={(data) => updateNode(editIndex, data)}
+        />
+      )}
+      {confirmDelete && (
+        <ConfirmDialog
+          title={
+            confirmDelete.type === "single"
+              ? `确定要删除节点 ${nodes[confirmDelete.idx]?.address || nodes[confirmDelete.idx]?.name || ""} 吗?`
+              : `确定要删除选中的 ${confirmDelete.indices.length} 个节点吗?`
+          }
+          description="删除后,节点相关配置将丢失。确定要删除吗?"
+          confirmText="删除"
+          cancelText="取消"
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={doConfirmDelete}
         />
       )}
     </section>

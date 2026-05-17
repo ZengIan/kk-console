@@ -92,7 +92,7 @@ function ClusterForm({ saveRef }) {
     return (
       <section className="section">
         <div className="config-card" style={{ textAlign: "center", color: "var(--text-tertiary)", padding: 48 }}>
-          加载安装配置 Schema...
+          加载安装模块配置...
         </div>
       </section>
     );

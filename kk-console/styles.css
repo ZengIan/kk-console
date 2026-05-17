@@ -1074,3 +1074,8 @@ html, body {
   border-color: #fff;
   box-shadow: 0 0 0 2px var(--primary-500);
 }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

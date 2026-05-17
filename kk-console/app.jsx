@@ -1,3 +1,75 @@
+// ============ 全局 Toast 通知 ============
+function Toaster() {
+  const [toasts, setToasts] = React.useState([]);
+
+  React.useEffect(() => {
+    window.showToast = (message, type = "info", details = null) => {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => [...prev, { id, message, type, details, expanded: false }]);
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), type === "error" ? 8000 : 4000);
+    };
+    return () => { delete window.showToast; };
+  }, []);
+
+  const dismiss = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+  const toggleExpand = (id) => setToasts((prev) => prev.map((t) => t.id === id ? { ...t, expanded: !t.expanded } : t));
+
+  if (!toasts.length) return null;
+
+  const colors = {
+    success: { bg: "#f0fdf4", border: "#86efac", icon: "#16a34a", bar: "#16a34a" },
+    error:   { bg: "#fef2f2", border: "#fca5a5", icon: "#dc2626", bar: "#dc2626" },
+    info:    { bg: "#eff6ff", border: "#93c5fd", icon: "#2563eb", bar: "#2563eb" },
+  };
+
+  const icons = {
+    success: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    error:   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M8 5v3.5M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    info:    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M8 7v4M8 5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+  };
+
+  return (
+    <div style={{ position: "fixed", top: 16, right: 16, zIndex: 9999, display: "flex", flexDirection: "column", gap: 8, maxWidth: 400, width: "100%" }}>
+      {toasts.map((t) => {
+        const c = colors[t.type] || colors.info;
+        return (
+          <div key={t.id} style={{
+            background: c.bg, border: `1px solid ${c.border}`, borderLeft: `4px solid ${c.bar}`,
+            borderRadius: 8, padding: "12px 14px", boxShadow: "0 4px 12px rgba(0,0,0,.10)",
+            animation: "slideIn .2s ease",
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <span style={{ color: c.icon, flexShrink: 0, marginTop: 1 }}>{icons[t.type] || icons.info}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", lineHeight: 1.4 }}>{t.message}</div>
+                {t.details && (
+                  <>
+                    <button
+                      onClick={() => toggleExpand(t.id)}
+                      style={{ fontSize: 11, color: c.icon, background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 4 }}
+                    >
+                      {t.expanded ? "收起详情 ▲" : "查看详情 ▼"}
+                    </button>
+                    {t.expanded && (
+                      <pre style={{
+                        marginTop: 6, padding: "8px 10px", background: "rgba(0,0,0,.04)",
+                        borderRadius: 4, fontSize: 11, fontFamily: "var(--font-mono)",
+                        color: "#374151", whiteSpace: "pre-wrap", wordBreak: "break-all",
+                        maxHeight: 200, overflowY: "auto",
+                      }}>{t.details}</pre>
+                    )}
+                  </>
+                )}
+              </div>
+              <span onClick={() => dismiss(t.id)} style={{ cursor: "pointer", color: "#94a3b8", flexShrink: 0, fontSize: 16, lineHeight: 1 }}>×</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ============ Playbook 日志查看(通用) ============
 function PlaybookLogModal({ namespace, name, title, onClose }) {
   const [phase, setPhase] = React.useState("Pending");
@@ -279,10 +351,12 @@ function App() {
         if (e.status === 422 && e.data) {
           setPrecheckErrors(e.data);
           setInstalling(false);
-          return; // 阻断前进
+          window.showToast?.("配置预检失败，请修正后重试", "error",
+            Object.entries(e.data).map(([f, m]) => `[${f}] ${m}`).join("\n"));
+          return;
         }
-        // 其他错误只记录,不阻断
         console.warn("保存配置失败(非阻断):", e.message);
+        window.showToast?.("配置保存失败（非阻断）", "error", e.message);
       } finally {
         setInstalling(false);
       }
@@ -293,7 +367,6 @@ function App() {
       setInstalling(true);
       setInstallError(null);
       try {
-        // 确保最新节点已写入 Inventory
         await saveNodesToInventory(nodes);
 
         const pb = await window.kkApi.createPlaybook({
@@ -307,9 +380,11 @@ function App() {
           name:      pb?.metadata?.name,
           namespace: pb?.metadata?.namespace || "default",
         });
+        window.showToast?.("安装任务已启动", "success");
         setStep(2);
       } catch (e) {
         setInstallError(`启动安装失败: ${e.message}`);
+        window.showToast?.("启动安装失败", "error", e.message);
       } finally {
         setInstalling(false);
       }
@@ -400,6 +475,7 @@ function App() {
       </main>
 
       <TweaksPanel />
+      <Toaster />
 
       {logModal && (
         <PlaybookLogModal

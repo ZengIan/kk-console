@@ -71,9 +71,11 @@ function ManualAddModal({ onClose, onAdd }) {
         privateKey: authMethod === "key" ? password : undefined,
       }]);
       onAdd?.(host);
+      window.showToast?.("节点添加成功", "success");
       onClose();
     } catch (e) {
       setError(`SSH 预检失败: ${e.message}`);
+      window.showToast?.("节点添加失败", "error", e.message);
     } finally {
       setLoading(false);
     }
@@ -334,8 +336,14 @@ function NodeScanModal({ onClose, onAdd }) {
   const goToAuth = () => {
     const ips = [...selected];
     setActiveNode(ips[0] || null);
-    setVerifyStatus({});
     setAuthError(null);
+    // 扫描结果中已预授权的节点直接标为 ok
+    const preAuth = {};
+    ips.forEach((ip) => {
+      const r = (results || []).find((x) => (x.ip || x.address) === ip);
+      if (r?.sshAuthorized) preAuth[ip] = "ok";
+    });
+    setVerifyStatus(preAuth);
     setStep("auth");
   };
 
@@ -343,31 +351,52 @@ function NodeScanModal({ onClose, onAdd }) {
     const ips = [...selected];
     setVerifying(true);
     setAuthError(null);
-    const init = {};
-    ips.forEach((ip) => (init[ip] = "pending"));
-    setVerifyStatus(init);
+    // 已预授权的保持 ok，其他置 pending
+    setVerifyStatus((prev) => {
+      const next = {};
+      ips.forEach((ip) => { next[ip] = prev[ip] === "ok" ? "ok" : "pending"; });
+      return next;
+    });
+    // 只对尚未授权的节点发起验证
+    const toCheck = ips.filter((ip) => {
+      const r = (results || []).find((x) => (x.ip || x.address) === ip);
+      return !r?.sshAuthorized;
+    });
     try {
-      const hosts = ips.map((ip) => ({
-        address: ip,
-        port: Number(scanPort),
-        user: authUser,
-        ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
-      }));
-      const resp = await window.kkApi.preCheckHosts(hosts);
-      const list = Array.isArray(resp) ? resp : (resp.items || []);
-      const st = {};
-      list.forEach((r) => {
-        const ip = r.address || r.ip;
-        const ok = ["ok", "succeeded", "reachable", "success"].includes(String(r.status).toLowerCase());
-        st[ip] = ok ? "ok" : "error";
-      });
-      ips.forEach((ip) => { if (!st[ip]) st[ip] = "error"; });
-      setVerifyStatus(st);
+      if (toCheck.length) {
+        const hosts = toCheck.map((ip) => ({
+          address: ip,
+          port: Number(scanPort),
+          user: authUser,
+          ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
+        }));
+        const resp = await window.kkApi.preCheckHosts(hosts);
+        const list = Array.isArray(resp) ? resp : (resp.items || []);
+        const st = {};
+        list.forEach((r) => {
+          const ip = r.address || r.ip;
+          const ok = ["ok", "succeeded", "reachable", "success"].includes(String(r.status).toLowerCase());
+          st[ip] = ok ? "ok" : "error";
+        });
+        toCheck.forEach((ip) => { if (!st[ip]) st[ip] = "error"; });
+        setVerifyStatus((prev) => ({ ...prev, ...st }));
+
+        const failCount = Object.values(st).filter((v) => v === "error").length;
+        if (failCount > 0) {
+          const failIps = Object.entries(st).filter(([, v]) => v === "error").map(([ip]) => ip).join("\n");
+          window.showToast?.(`${failCount} 个节点验证失败`, "error", failIps);
+        } else {
+          window.showToast?.("所有节点 SSH 验证通过", "success");
+        }
+      } else {
+        window.showToast?.("所有节点已通过 SSH 密钥预授权，无需手动验证", "success");
+      }
     } catch (e) {
       setAuthError(`验证失败: ${e.message}`);
       const st = {};
-      ips.forEach((ip) => (st[ip] = "error"));
-      setVerifyStatus(st);
+      toCheck.forEach((ip) => (st[ip] = "error"));
+      setVerifyStatus((prev) => ({ ...prev, ...st }));
+      window.showToast?.("SSH 验证请求失败", "error", e.message);
     } finally {
       setVerifying(false);
     }
@@ -388,6 +417,7 @@ function NodeScanModal({ onClose, onAdd }) {
       };
     });
     onAdd?.(nodes);
+    window.showToast?.(`节点添加成功，共 ${nodes.length} 个`, "success");
     onClose();
   };
 
@@ -606,22 +636,39 @@ function NodeScanModal({ onClose, onAdd }) {
           <div className="form-row">
             <div className="form-row-label required">SSH 认证</div>
             <div className="form-row-control">
-              <div className="choice-group" style={{ marginBottom: 12 }}>
-                <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
-                <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
-              </div>
-              {authMethod === "password" ? (
-                <div className="password-input">
-                  <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 密码" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
-                  <span className="eye" onClick={() => setShowPwd((s) => !s)}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
-                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
-                    </svg>
-                  </span>
+              {/* 已预授权提示 */}
+              {activeNode && (results || []).find((x) => (x.ip || x.address) === activeNode)?.sshAuthorized ? (
+                <div style={{
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  padding: "10px 14px", background: "#1e293b", color: "#f1f5f9",
+                  borderRadius: 8, fontSize: 13, lineHeight: 1.5,
+                }}>
+                  <svg style={{ flexShrink: 0, marginTop: 2, color: "#60a5fa" }} width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
+                    <path d="M8 7v4M8 5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  该节点已通过 SSH 密钥预授权，无需手动输入认证信息
                 </div>
               ) : (
-                <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+                <>
+                  <div className="choice-group" style={{ marginBottom: 12 }}>
+                    <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
+                    <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+                  </div>
+                  {authMethod === "password" ? (
+                    <div className="password-input">
+                      <input className="input" type={showPwd ? "text" : "password"} placeholder="请输入 SSH 密码" value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+                      <span className="eye" onClick={() => setShowPwd((s) => !s)}>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                        </svg>
+                      </span>
+                    </div>
+                  ) : (
+                    <textarea className="input" rows={4} placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={authSecret} onChange={(e) => setAuthSecret(e.target.value)} />
+                  )}
+                </>
               )}
             </div>
           </div>

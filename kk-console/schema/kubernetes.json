@@ -9,10 +9,10 @@
     "type": "object",
     "properties": {
       "kubernetes": {
-    "type": "object",
-    "title": "集群配置",
-    "properties": {
-      "cluster_name": {
+        "type": "object",
+        "title": "集群配置",
+        "properties": {
+          "cluster_name": {
             "type": "string",
             "title": "集群名称",
             "default": "host-cluster"
@@ -49,25 +49,36 @@
               "type": {
                 "type": "string",
                 "title": "路由方式",
-                "enum": ["local", "haproxy"],
+                "enum": [
+                  "local",
+                  "haproxy"
+                ],
                 "default": "local"
               },
               "kubelet": {
                 "type": "object",
                 "properties": {
                   "max_pods": {
-                  "type": "integer",
-                  "title": "每节点最大 Pod 数",
-                  "default": 110,
-                  "minimum": 1
+                    "type": "integer",
+                    "title": "每节点最大 Pod 数",
+                    "default": 110,
+                    "minimum": 1
                   }
                 }
-              }             
+              }
             },
-            "required": ["host", "port", "type"]
+            "required": [
+              "host",
+              "port",
+              "type"
+            ]
           }
         },
-        "required": ["cluster_name", "kube_version","control_plane_endpoint"]
+        "required": [
+          "cluster_name",
+          "kube_version",
+          "control_plane_endpoint"
+        ]
       },
       "cri": {
         "type": "object",
@@ -76,11 +87,16 @@
           "container_manager": {
             "type": "string",
             "title": "类型",
-            "enum": ["docker", "containerd"],
+            "enum": [
+              "docker",
+              "containerd"
+            ],
             "default": "containerd"
           }
         },
-        "required": ["container_manager"]
+        "required": [
+          "container_manager"
+        ]
       },
       "cni": {
         "type": "object",
@@ -89,7 +105,13 @@
           "type": {
             "type": "string",
             "title": "网络插件",
-            "enum": ["calico", "cilium", "flannel", "hybridnet", "kubeovn"],
+            "enum": [
+              "calico",
+              "cilium",
+              "flannel",
+              "hybridnet",
+              "kubeovn"
+            ],
             "default": "calico"
           },
           "service_cidr": {
@@ -123,7 +145,13 @@
             "maximum": 126
           }
         },
-        "required": ["type","service_cidr","pod_cidr","ipv4_mask_size","ipv6_mask_size"]
+        "required": [
+          "type",
+          "service_cidr",
+          "pod_cidr",
+          "ipv4_mask_size",
+          "ipv6_mask_size"
+        ]
       },
       "image_registry": {
         "type": "object",
@@ -132,8 +160,14 @@
           "type": {
             "type": "string",
             "title": "安装类型",
-            "enum": ["", "harbor"],
-            "enumNames": ["不安装", "Harbor"],
+            "enum": [
+              "",
+              "harbor"
+            ],
+            "enumNames": [
+              "不安装",
+              "Harbor"
+            ],
             "default": "harbor"
           },
           "harbor": {
@@ -174,7 +208,9 @@
             }
           }
         },
-        "required": ["auth"]
+        "required": [
+          "auth"
+        ]
       },
       "storage_class": {
         "type": "object",
@@ -210,7 +246,12 @@
         }
       }
     },
-    "required": ["kubernetes", "cni","cri", "image_registry"]
+    "required": [
+      "kubernetes",
+      "cni",
+      "cri",
+      "image_registry"
+    ]
   },
   "uiSchema": {
     "fields": {
@@ -230,9 +271,9 @@
     }
   },
   "playbookPath": {
-    "precheck.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/precheck.yaml",
-    "install.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/install.yaml",
-    "check.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/check.yaml",
-    "uninstall.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/uninstall.yaml"
+    "precheck.kubekey.kubesphere.io/schema": "kk-console/kubernetes/playbooks/precheck.yaml",
+    "install.kubekey.kubesphere.io/schema": "kk-console/kubernetes/playbooks/install.yaml",
+    "check.kubekey.kubesphere.io/schema": "kk-console/kubernetes/playbooks/check.yaml",
+    "uninstall.kubekey.kubesphere.io/schema": "kk-console/kubernetes/playbooks/uninstall.yaml"
   }
 }

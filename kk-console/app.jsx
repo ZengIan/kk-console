@@ -1,11 +1,21 @@
 // 主 App — 安装向导,支持步骤切换
 function App() {
   const [step, setStep] = React.useState(0);
+  const clusterSaveRef = React.useRef(null);
 
   const titles = ["基本信息", "安装预览", "安装", "安装校验"];
 
   const goPrev = () => setStep((s) => Math.max(0, s - 1));
-  const goNext = () => setStep((s) => Math.min(3, s + 1));
+
+  // 步骤 0 → 1 时先保存集群配置,失败不阻断(允许离线/开发场景)
+  const goNext = async () => {
+    if (step === 0 && clusterSaveRef.current) {
+      await clusterSaveRef.current().catch((e) =>
+        console.warn("goNext: 保存配置失败(非阻断):", e.message)
+      );
+    }
+    setStep((s) => Math.min(3, s + 1));
+  };
 
   return (
     <div className="app">
@@ -18,7 +28,7 @@ function App() {
           {step === 0 &&
           <>
               <NodeSettings />
-              <ClusterForm />
+              <ClusterForm saveRef={clusterSaveRef} />
             </>
           }
           {step === 1 && <InstallPreview />}

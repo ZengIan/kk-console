@@ -34,6 +34,7 @@ function ManualAddModal({ onClose, onAdd }) {
   const [octets, setOctets] = React.useState(["", "", "", ""]);
   const [role, setRole] = React.useState("master");
   const [arch, setArch] = React.useState("amd64");
+  const [os, setOs] = React.useState("");
   const [sshHost, setSshHost] = React.useState("");
   const [sshPort, setSshPort] = React.useState(22);
   const [sshUser, setSshUser] = React.useState("root");
@@ -55,6 +56,7 @@ function ManualAddModal({ onClose, onAdd }) {
       address: ip,
       role,
       arch,
+      os,
       port: Number(sshPort),
       user: sshUser,
       status: "ok",
@@ -186,6 +188,13 @@ function ManualAddModal({ onClose, onAdd }) {
           ) : (
             <textarea className="input" rows="4" placeholder="请粘贴 SSH 私钥(PEM 格式)" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} value={password} onChange={(e) => setPassword(e.target.value)} />
           )}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">操作系统</div>
+        <div className="form-row-control">
+          <input className="input" placeholder="如: Ubuntu 22.04 / CentOS 7.9" value={os} onChange={(e) => setOs(e.target.value)} />
         </div>
       </div>
 
@@ -406,13 +415,15 @@ function NodeScanModal({ onClose, onAdd }) {
     const nodes = [...selected].map((ip) => {
       const r = (results || []).find((x) => (x.address || x.ip) === ip) || {};
       return {
-        name: r.hostname || ip.replace(/\./g, "-"),
-        address: ip,
-        port: Number(scanPort),
-        user: authUser,
-        arch: r.arch || "amd64",
-        role: "",
-        status: "ok",
+        name:       r.hostname || ip.replace(/\./g, "-"),
+        address:    ip,
+        port:       Number(scanPort),
+        user:       authUser,
+        arch:       r.arch || "amd64",
+        archLocked: true,   // arch 来自扫描/系统检测，编辑时锁定
+        os:         r.os || "",
+        role:       "",
+        status:     "ok",
         ...(authMethod === "password" ? { password: authSecret } : { privateKey: authSecret }),
       };
     });
@@ -499,20 +510,38 @@ function NodeScanModal({ onClose, onAdd }) {
                   <th style={{ width: 48, padding: "10px 16px", textAlign: "left" }}>
                     <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                   </th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 600, fontSize: 13 }}>节点 IP 地址</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>主机名</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>节点 IP 地址</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>状态</th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.length === 0 ? (
-                  <tr><td colSpan={2} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
+                  <tr><td colSpan={4} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
                 ) : pageItems.map((r) => {
                   const ip = r.address || r.ip;
+                  const alreadyAdded = !!(r.added || r.Added);
+                  const hostname = r.hostname || ip.replace(/\./g, "-");
                   return (
-                    <tr key={ip} style={{ borderBottom: "1px solid var(--border-light)", cursor: "pointer" }} onClick={() => toggleSelect(ip)}>
+                    <tr
+                      key={ip}
+                      style={{ borderBottom: "1px solid var(--border-light)", cursor: alreadyAdded ? "not-allowed" : "pointer", opacity: alreadyAdded ? 0.55 : 1 }}
+                      onClick={() => !alreadyAdded && toggleSelect(ip)}
+                    >
                       <td style={{ padding: "10px 16px" }}>
-                        <input type="checkbox" checked={selected.has(ip)} onChange={() => toggleSelect(ip)} onClick={(e) => e.stopPropagation()} />
+                        <input type="checkbox" checked={selected.has(ip)} disabled={alreadyAdded} onChange={() => toggleSelect(ip)} onClick={(e) => e.stopPropagation()} />
                       </td>
-                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)" }}>{ip}</td>
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{hostname}</td>
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{ip}</td>
+                      <td style={{ padding: "10px 16px" }}>
+                        {alreadyAdded ? (
+                          <span style={{ fontSize: 11, padding: "2px 7px", background: "rgba(239,68,68,.08)", color: "var(--danger)", border: "1px solid rgba(239,68,68,.2)", borderRadius: 4 }}>已添加</span>
+                        ) : r.sshAuthorized ? (
+                          <span style={{ fontSize: 11, padding: "2px 7px", background: "rgba(22,163,74,.08)", color: "var(--success)", border: "1px solid rgba(22,163,74,.2)", borderRadius: 4 }}>已授权</span>
+                        ) : (
+                          <span style={{ fontSize: 11, padding: "2px 7px", background: "var(--bg-hover)", color: "var(--text-secondary)", border: "1px solid var(--border)", borderRadius: 4 }}>待验证</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -694,6 +723,7 @@ function EditNodeModal({ node, onClose, onConfirm }) {
   const [authMethod, setAuthMethod] = React.useState(node?.privateKey ? "key" : "password");
   const [authSecret, setAuthSecret] = React.useState(node?.password || node?.privateKey || "");
   const [showPwd, setShowPwd] = React.useState(false);
+  const [os, setOs] = React.useState(node?.os || "");
 
   const setOctet = (i) => (e) => {
     const v = e.target.value.replace(/\D/g, "").slice(0, 3);
@@ -709,6 +739,7 @@ function EditNodeModal({ node, onClose, onConfirm }) {
       port: Number(sshPort),
       user: sshUser,
       arch,
+      os,
       role,
       ...(authMethod === "password"
         ? { password: authSecret, privateKey: undefined }
@@ -725,7 +756,7 @@ function EditNodeModal({ node, onClose, onConfirm }) {
   );
 
   return (
-    <Modal title="编辑节点" onClose={onClose} footer={footer}>
+    <Modal title="编辑节点" onClose={onClose} footer={footer} size="lg">
       <div className="form-row">
         <div className="form-row-label required">主机名</div>
         <div className="form-row-control">
@@ -771,11 +802,27 @@ function EditNodeModal({ node, onClose, onConfirm }) {
       <div className="form-row">
         <div className="form-row-label">CPU 架构</div>
         <div className="form-row-control">
-          <div className="choice-group">
-            {[{ v: "amd64", l: "AMD64" }, { v: "arm64", l: "ARM64" }].map((o) => (
-              <button key={o.v} className={`choice-btn ${arch === o.v ? "active" : ""}`} onClick={() => setArch(o.v)}>{o.l}</button>
-            ))}
-          </div>
+          {node?.archLocked ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ padding: "5px 12px", border: "1px solid var(--border)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", background: "var(--bg-hover)", color: "var(--text-secondary)" }}>
+                {arch.toUpperCase()}
+              </span>
+              <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>由系统自动检测，不可修改</span>
+            </div>
+          ) : (
+            <div className="choice-group">
+              {[{ v: "amd64", l: "AMD64" }, { v: "arm64", l: "ARM64" }].map((o) => (
+                <button key={o.v} className={`choice-btn ${arch === o.v ? "active" : ""}`} onClick={() => setArch(o.v)}>{o.l}</button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-row-label">操作系统</div>
+        <div className="form-row-control">
+          <input className="input" placeholder="如: Ubuntu 22.04 / CentOS 7.9" value={os} onChange={(e) => setOs(e.target.value)} />
         </div>
       </div>
 

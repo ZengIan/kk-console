@@ -226,7 +226,9 @@ function buildInventory(nodes) {
     hosts[node.name] = {
       internal_ipv4: node.address,
       connector,
-      ...(node.arch ? { arch: node.arch } : {}),
+      ...(node.arch       ? { arch: node.arch }             : {}),
+      ...(node.os         ? { os: node.os }                 : {}),
+      ...(node.archLocked ? { archLocked: node.archLocked } : {}),
     };
 
     if (node.role === "master" || node.role === "both") masters.push(node.name);
@@ -266,6 +268,8 @@ function inventoryHostsToNodes(items) {
       password:   h.sshPassword || "",
       privateKey: h.sshPrivateKeyContent || "",
       arch:       h.arch || "amd64",
+      archLocked: h.archLocked || false,
+      os:         h.os || "",
       role,
       status:     "ok",
     };

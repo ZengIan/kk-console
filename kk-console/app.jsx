@@ -17,13 +17,13 @@ function Toaster() {
   if (!toasts.length) return null;
 
   const colors = {
-    success: { bg: "#f0fdf4", border: "#86efac", icon: "#16a34a", bar: "#16a34a" },
+    success: { bg: "#eff6ff", border: "#93c5fd", icon: "#2563eb", bar: "#2563eb" },
     error:   { bg: "#fef2f2", border: "#fca5a5", icon: "#dc2626", bar: "#dc2626" },
     info:    { bg: "#eff6ff", border: "#93c5fd", icon: "#2563eb", bar: "#2563eb" },
   };
 
   const icons = {
-    success: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    success: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#2563eb" strokeWidth="1.4"/><path d="M5 8l2 2 4-4" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     error:   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M8 5v3.5M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     info:    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/><path d="M8 7v4M8 5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
   };

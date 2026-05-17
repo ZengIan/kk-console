@@ -133,7 +133,12 @@ function ClusterForm({ saveRef }) {
         <div className={`segmented-item ${mode === "form" ? "active" : ""}`} onClick={() => setMode("form")}>
           表单模式
         </div>
-        <div className={`segmented-item ${mode === "yaml" ? "active" : ""}`} onClick={() => setMode("yaml")}>
+        <div className={`segmented-item ${mode === "yaml" ? "active" : ""}`} onClick={() => {
+          if (activeName) {
+            setYamlMap((prev) => ({ ...prev, [activeName]: jsonToYaml(valuesMap[activeName] || {}) }));
+          }
+          setMode("yaml");
+        }}>
           YAML 模式
         </div>
       </div>

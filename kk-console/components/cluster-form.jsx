@@ -4,7 +4,8 @@
 //   values (动态)  ←- kkApi.getSchemaConfig() 初始,用户编辑实时更新
 //   YAML 文本       ←- 由 values 序列化, 编辑时反向解析回 values
 
-function ClusterForm() {
+// saveRef: React.MutableRefObject — 父组件通过它触发保存
+function ClusterForm({ saveRef }) {
   const [tab, setTab] = React.useState("kubernetes");
   const [mode, setMode] = React.useState("form"); // form | yaml
   const [schema, setSchema] = React.useState(null);
@@ -12,7 +13,8 @@ function ClusterForm() {
   const [values, setValues] = React.useState({});
   const [yaml, setYaml] = React.useState("");
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState(null);
 
   // 初次加载 schema + 已保存 config
   React.useEffect(() => {
@@ -20,9 +22,15 @@ function ClusterForm() {
     (async () => {
       let s, ui, cfg;
       try {
-        const data = await window.kkApi.getSchema("kubernetes.json");
-        s = data.dataSchema;
-        ui = data.uiSchema || {};
+        const raw = await window.kkApi.getSchema("kubernetes.json");
+        // 后端直接返回 raw JSON Schema, 或已包装成 { dataSchema, uiSchema }
+        if (raw && raw.dataSchema) {
+          s = raw.dataSchema;
+          ui = raw.uiSchema || {};
+        } else {
+          s = raw;
+          ui = {};
+        }
       } catch (e) {
         console.warn("拉取 schema 失败,使用内置 fallback:", e.message);
         s = window.FALLBACK_SCHEMA.dataSchema;
@@ -52,6 +60,27 @@ function ClusterForm() {
   React.useEffect(() => {
     if (mode === "form") setYaml(jsonToYaml(values));
   }, [values, mode]);
+
+  // 保存配置到后端
+  const saveConfig = React.useCallback(async () => {
+    if (!values || !Object.keys(values).length) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await window.kkApi.saveSchemaConfig(values);
+    } catch (e) {
+      console.warn("保存配置失败:", e.message);
+      setSaveError(e.message);
+      throw e;
+    } finally {
+      setSaving(false);
+    }
+  }, [values]);
+
+  // 把 save 函数挂到 saveRef 上,供父组件(goNext)调用
+  React.useEffect(() => {
+    if (saveRef) saveRef.current = saveConfig;
+  }, [saveRef, saveConfig]);
 
   // YAML 直接编辑 → 反向同步 values
   const onYamlChange = (text) => {
@@ -103,6 +132,12 @@ function ClusterForm() {
         </div>
       ) : (
         <YamlPreview yaml={yaml} onChange={onYamlChange} clusterName={values?.kubernetes?.cluster_name || "cluster"} />
+      )}
+
+      {saveError && (
+        <div style={{ marginTop: 8, color: "var(--danger, #ef4444)", fontSize: 13 }}>
+          保存失败: {saveError}
+        </div>
       )}
     </section>
   );

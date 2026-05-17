@@ -12,14 +12,14 @@
 <body>
 <div id="root"></div>
 
-<!-- 组件按顺序加载 -->
+<!-- 组件按顺序加载: api.jsx 提前,保证后续脚本能访问 window.kkApi -->
 <script type="text/babel" src="components/icons.jsx"></script>
 <script type="text/babel" src="components/sidebar.jsx"></script>
-<script type="text/babel" src="components/modals.jsx"></script>
-<script type="text/babel" src="components/node-settings.jsx"></script>
+<script type="text/babel" src="components/api.jsx"></script>
 <script type="text/babel" src="components/yaml-utils.jsx"></script>
 <script type="text/babel" src="components/fallback-schema.jsx"></script>
-<script type="text/babel" src="components/api.jsx"></script>
+<script type="text/babel" src="components/modals.jsx"></script>
+<script type="text/babel" src="components/node-settings.jsx"></script>
 <script type="text/babel" src="components/schema-form.jsx"></script>
 <script type="text/babel" src="components/schemas-store.jsx"></script>
 <script type="text/babel" src="components/cluster-form.jsx"></script>

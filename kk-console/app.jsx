@@ -1,3 +1,73 @@
+// ============ Playbook 日志查看(通用) ============
+function PlaybookLogModal({ namespace, name, title, onClose }) {
+  const [phase, setPhase] = React.useState("Pending");
+  const [log, setLog] = React.useState("");
+  const logRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!name || !namespace) return;
+    const ctrl = new AbortController();
+
+    window.kkApi.watchPlaybook(namespace, name, (data) => {
+      const p = data?.status?.phase;
+      if (p) setPhase(p);
+    }, { signal: ctrl.signal, intervalMs: 2000 }).catch(() => {});
+
+    window.kkApi.streamPlaybookLog(namespace, name, (chunk) => {
+      setLog((prev) => prev + chunk);
+    }, ctrl.signal).catch(() => {});
+
+    return () => ctrl.abort();
+  }, [namespace, name]);
+
+  React.useEffect(() => {
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [log]);
+
+  const phaseColor = {
+    Succeeded: "var(--success)",
+    Failed:    "var(--danger)",
+    Running:   "var(--primary-500)",
+  }[phase] || "var(--text-secondary)";
+
+  return (
+    <div className="modal-mask" onClick={onClose}>
+      <div className="modal modal-lg" style={{ width: 900 }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">{title || `Playbook: ${name}`}</h3>
+          <span className="modal-close" onClick={onClose}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          </span>
+        </div>
+        <div className="modal-body" style={{ padding: "16px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Playbook:</span>
+            <code style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}>{namespace}/{name}</code>
+            <span style={{ fontSize: 13, fontWeight: 600, color: phaseColor }}>{phase}</span>
+          </div>
+          <div
+            ref={logRef}
+            style={{
+              background: "#0d1117", color: "#e2e8f0",
+              fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6,
+              padding: "12px 16px", borderRadius: 8,
+              minHeight: 400, maxHeight: 560, overflowY: "auto",
+              whiteSpace: "pre-wrap", wordBreak: "break-all",
+            }}
+          >
+            {log || "等待日志输出..."}
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>关闭</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============ Playbook 安装进度 ============
 function InstallStep({ namespace, name, onDone }) {
   const [phase, setPhase] = React.useState("Pending");
@@ -20,7 +90,6 @@ function InstallStep({ namespace, name, onDone }) {
     return () => ctrl.abort();
   }, [namespace, name]);
 
-  // 日志自动滚到底
   React.useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
@@ -50,18 +119,11 @@ function InstallStep({ namespace, name, onDone }) {
         <div
           ref={logRef}
           style={{
-            background: "var(--bg-dark, #0f172a)",
-            color: "#e2e8f0",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            lineHeight: 1.6,
-            padding: "12px 16px",
-            borderRadius: 8,
-            minHeight: 320,
-            maxHeight: 480,
-            overflowY: "auto",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-all",
+            background: "#0d1117", color: "#e2e8f0",
+            fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6,
+            padding: "12px 16px", borderRadius: 8,
+            minHeight: 320, maxHeight: 480, overflowY: "auto",
+            whiteSpace: "pre-wrap", wordBreak: "break-all",
           }}
         >
           {log || "等待日志输出..."}
@@ -71,21 +133,30 @@ function InstallStep({ namespace, name, onDone }) {
   );
 }
 
-// 把 nodes 数组组装成 Inventory Kubernetes 对象
+// ============ Inventory 持久化工具 ============
+
+// 把 UI nodes 构建成符合后端 CRD 结构的 Inventory
+// 宿主机字段: internal_ipv4 + connector.{ host, port(string), user, password, private_key_content }
 function buildInventory(nodes) {
   const hosts = {};
   const masters = [];
   const workers = [];
 
   for (const node of nodes) {
-    hosts[node.name] = {
-      address: node.address,
-      port: node.port || 22,
+    const connector = {
+      host: node.address,
+      port: String(node.port || 22),
       user: node.user || "root",
-      ...(node.password   ? { password: node.password }     : {}),
-      ...(node.privateKey ? { privateKey: node.privateKey } : {}),
-      ...(node.arch       ? { arch: node.arch }             : {}),
     };
+    if (node.password)   connector.password = node.password;
+    if (node.privateKey) connector.private_key_content = node.privateKey;
+
+    hosts[node.name] = {
+      internal_ipv4: node.address,
+      connector,
+      ...(node.arch ? { arch: node.arch } : {}),
+    };
+
     if (node.role === "master" || node.role === "both") masters.push(node.name);
     if (node.role === "worker" || node.role === "both") workers.push(node.name);
   }
@@ -93,56 +164,149 @@ function buildInventory(nodes) {
   return {
     apiVersion: "core.kubekey.kubesphere.io/v1",
     kind: "Inventory",
-    metadata: { generateName: "inventory-" },
+    metadata: { name: "default", namespace: "default" },
     spec: {
       hosts,
       groups: {
         kube_control_plane: { hosts: masters },
-        kube_node: { hosts: workers.length ? workers : masters },
-        all: { hosts: Object.keys(hosts) },
+        kube_node:          { hosts: workers.length ? workers : masters },
+        all:                { hosts: Object.keys(hosts) },
       },
     },
   };
+}
+
+// 从后端 InventoryHostTable 列表恢复 UI nodes
+function inventoryHostsToNodes(items) {
+  return items.map((h) => {
+    const groups  = (h.groups || []).map((g) => g.role);
+    const isMaster = groups.includes("kube_control_plane");
+    const isWorker = groups.includes("kube_node");
+    const role = (isMaster && isWorker) ? "both"
+               : isMaster               ? "master"
+               : isWorker               ? "worker"
+               : "";
+    return {
+      name:       h.name,
+      address:    h.internalIPV4 || h.sshHost || "",
+      port:       parseInt(h.sshPort, 10) || 22,
+      user:       h.sshUser || "root",
+      password:   h.sshPassword || "",
+      privateKey: h.sshPrivateKeyContent || "",
+      arch:       h.arch || "amd64",
+      role,
+      status:     "ok",
+    };
+  });
+}
+
+// 持久化节点到 Inventory(静默 upsert, promise=false 不触发 host-check)
+async function saveNodesToInventory(nodes) {
+  if (!nodes.length) return;
+  const inv = buildInventory(nodes);
+  const patch = { spec: inv.spec };
+  try {
+    await window.kkApi.patchInventory("default", "default", patch, { promise: false, type: "merge" });
+  } catch (e) {
+    if (String(e.message).includes("404") || String(e.message).toLowerCase().includes("not found")) {
+      await window.kkApi.createInventory(inv);
+    }
+    // 其他错误静默忽略,不影响 UI
+  }
+}
+
+// 启动时从 Inventory 读回节点列表
+async function loadNodesFromInventory() {
+  try {
+    const data = await window.kkApi.listInventoryHosts("default", "default");
+    const items = Array.isArray(data) ? data : (data.items || []);
+    return inventoryHostsToNodes(items);
+  } catch (e) {
+    return [];
+  }
 }
 
 // ============ 主 App — 安装向导 ============
 function App() {
   const [step, setStep] = React.useState(0);
   const [nodes, setNodes] = React.useState([]);
+  const [nodesLoaded, setNodesLoaded] = React.useState(false);
   const [playbook, setPlaybook] = React.useState(null); // { name, namespace }
   const [installing, setInstalling] = React.useState(false);
   const [installError, setInstallError] = React.useState(null);
+  const [precheckErrors, setPrecheckErrors] = React.useState(null); // { filename: msg }
+  const [logModal, setLogModal] = React.useState(null); // { namespace, name, title }
   const clusterSaveRef = React.useRef(null);
+  const saveTimerRef   = React.useRef(null);
 
   const titles = ["基本信息", "安装预览", "安装", "安装校验"];
 
-  const goPrev = () => setStep((s) => Math.max(0, s - 1));
+  // 启动时恢复节点
+  React.useEffect(() => {
+    loadNodesFromInventory().then((loaded) => {
+      if (loaded.length) setNodes(loaded);
+      setNodesLoaded(true);
+    });
+  }, []);
+
+  // 节点变化时防抖保存到 Inventory
+  React.useEffect(() => {
+    if (!nodesLoaded) return;
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveNodesToInventory(nodes).catch(() => {});
+    }, 800);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [nodes, nodesLoaded]);
+
+  const goPrev = () => {
+    setInstallError(null);
+    setPrecheckErrors(null);
+    setStep((s) => Math.max(0, s - 1));
+  };
 
   const goNext = async () => {
-    // step 0→1: 保存集群配置(失败不阻断)
+    setInstallError(null);
+    setPrecheckErrors(null);
+
+    // step 0→1: 保存集群配置 + 等待 precheck
     if (step === 0 && clusterSaveRef.current) {
-      await clusterSaveRef.current().catch((e) =>
-        console.warn("goNext: 保存配置失败(非阻断):", e.message)
-      );
+      setInstalling(true);
+      try {
+        await clusterSaveRef.current();
+      } catch (e) {
+        // 422 precheck 失败: e.data 包含 { filename: failureMessage }
+        if (e.status === 422 && e.data) {
+          setPrecheckErrors(e.data);
+          setInstalling(false);
+          return; // 阻断前进
+        }
+        // 其他错误只记录,不阻断
+        console.warn("保存配置失败(非阻断):", e.message);
+      } finally {
+        setInstalling(false);
+      }
     }
 
-    // step 1→2: 创建 Inventory + Playbook,成功后才推进步骤
+    // step 1→2: 确保 Inventory 已更新,再创建安装 Playbook
     if (step === 1) {
       setInstalling(true);
       setInstallError(null);
       try {
-        const created = await window.kkApi.createInventory(buildInventory(nodes));
-        const invName = created?.metadata?.name || "default";
-        const invNs   = created?.metadata?.namespace || "default";
+        // 确保最新节点已写入 Inventory
+        await saveNodesToInventory(nodes);
 
         const pb = await window.kkApi.createPlaybook({
           apiVersion: "core.kubekey.kubesphere.io/v1",
           kind: "Playbook",
-          metadata: { generateName: "install-", namespace: invNs },
-          spec: { playbook: "kubernetes.yaml", inventory: invName },
+          metadata: { generateName: "install-", namespace: "default" },
+          spec: { playbook: "kubernetes.yaml", inventory: "default" },
         });
 
-        setPlaybook({ name: pb?.metadata?.name, namespace: pb?.metadata?.namespace || invNs });
+        setPlaybook({
+          name:      pb?.metadata?.name,
+          namespace: pb?.metadata?.namespace || "default",
+        });
         setStep(2);
       } catch (e) {
         setInstallError(`启动安装失败: ${e.message}`);
@@ -167,10 +331,35 @@ function App() {
             <>
               <NodeSettings nodes={nodes} onNodesChange={setNodes} />
               <ClusterForm saveRef={clusterSaveRef} />
+
+              {/* Precheck 失败详情 */}
+              {precheckErrors && (
+                <div style={{
+                  marginTop: 16, padding: "14px 18px",
+                  background: "rgba(239,68,68,.06)", border: "1px solid rgba(239,68,68,.25)",
+                  borderRadius: 8,
+                }}>
+                  <div style={{ fontWeight: 600, color: "var(--danger)", marginBottom: 8, fontSize: 14 }}>
+                    预检失败,请修正以下问题后重试
+                  </div>
+                  {Object.entries(precheckErrors).map(([schema, msg]) => (
+                    <div key={schema} style={{ fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)", marginRight: 8 }}>{schema}</span>
+                      <span style={{ color: "var(--danger)" }}>{msg}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
-          {step === 1 && <InstallPreview />}
+          {step === 1 && (
+            <>
+              <InstallPreview />
+              {/* 最近运行的 Playbook 列表(供查日志) */}
+              <RecentPlaybooks onViewLog={(ns, name, title) => setLogModal({ namespace: ns, name, title })} />
+            </>
+          )}
 
           {step === 2 && playbook && (
             <InstallStep
@@ -198,11 +387,11 @@ function App() {
           )}
           {step < 3 && step !== 2 && (
             <button className="btn btn-primary" onClick={goNext} disabled={installing}>
-              {installing ? "启动中..." : step === 1 ? "下一步: 执行安装" : "下一步"}
+              {installing ? (step === 0 ? "配置检查中..." : "启动中...") : step === 1 ? "下一步: 执行安装" : "下一步"}
             </button>
           )}
           {installError && (
-            <span style={{ fontSize: 13, color: "var(--danger, #ef4444)" }}>{installError}</span>
+            <span style={{ fontSize: 13, color: "var(--danger, #ef4444)", maxWidth: 480 }}>{installError}</span>
           )}
           {step === 3 && (
             <button className="btn btn-primary">完成</button>
@@ -211,7 +400,81 @@ function App() {
       </main>
 
       <TweaksPanel />
+
+      {logModal && (
+        <PlaybookLogModal
+          namespace={logModal.namespace}
+          name={logModal.name}
+          title={logModal.title}
+          onClose={() => setLogModal(null)}
+        />
+      )}
     </div>
+  );
+}
+
+// ============ 最近 Playbook 列表 — 供安装预览页查看日志 ============
+function RecentPlaybooks({ onViewLog }) {
+  const [playbooks, setPlaybooks] = React.useState([]);
+
+  React.useEffect(() => {
+    window.kkApi.listPlaybooks({ namespace: "default", limit: 20 })
+      .then((data) => {
+        const items = Array.isArray(data) ? data : (data.items || []);
+        setPlaybooks(items.slice(0, 10));
+      })
+      .catch(() => {});
+  }, []);
+
+  if (!playbooks.length) return null;
+
+  const phaseColor = {
+    Succeeded: "var(--success)",
+    Failed:    "var(--danger)",
+    Running:   "var(--primary-500)",
+    Pending:   "var(--text-tertiary)",
+  };
+
+  return (
+    <section className="section">
+      <h3 className="section-title">最近执行记录</h3>
+      <div className="config-card" style={{ padding: 0, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: "var(--bg-hover)", borderBottom: "1px solid var(--border)" }}>
+              {["Playbook", "命名空间", "状态", "操作"].map((h) => (
+                <th key={h} style={{ padding: "8px 14px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {playbooks.map((pb) => {
+              const name = pb.metadata?.name || "";
+              const ns   = pb.metadata?.namespace || "default";
+              const phase = pb.status?.phase || "Pending";
+              return (
+                <tr key={name} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                  <td style={{ padding: "8px 14px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{name}</td>
+                  <td style={{ padding: "8px 14px" }}>{ns}</td>
+                  <td style={{ padding: "8px 14px" }}>
+                    <span style={{ color: phaseColor[phase] || "var(--text-secondary)", fontWeight: 500 }}>{phase}</span>
+                  </td>
+                  <td style={{ padding: "8px 14px" }}>
+                    <button
+                      className="btn btn-ghost"
+                      style={{ fontSize: 12, padding: "3px 8px", color: "var(--primary-600)" }}
+                      onClick={() => onViewLog(ns, name, `日志: ${name}`)}
+                    >
+                      查看日志
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

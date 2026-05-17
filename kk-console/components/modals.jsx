@@ -283,16 +283,13 @@ function NodeScanModal({ onClose, onAdd }) {
     setSelected(new Set());
     setResults(null);
     try {
-      // 对每个条目：若是 CIDR 调 scanIP，单 IP 直接作为结果
+      // 单 IP 和 CIDR 都走 scanIP，单 IP 转为 /32
       const all = [];
       for (const entry of ips) {
-        if (entry.includes("/")) {
-          const data = await window.kkApi.scanIP({ cidr: entry, sshPort: Number(scanPort) });
-          const list = Array.isArray(data) ? data : (data.items || []);
-          all.push(...list);
-        } else {
-          all.push({ address: entry, ip: entry });
-        }
+        const cidr = entry.includes("/") ? entry : `${entry}/32`;
+        const data = await window.kkApi.scanIP({ cidr, sshPort: Number(scanPort) });
+        const list = Array.isArray(data) ? data : (data.items || []);
+        all.push(...list);
       }
       // 去重
       const seen = new Set();

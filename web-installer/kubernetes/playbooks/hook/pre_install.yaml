@@ -1,0 +1,25 @@
+---
+- name: Pre | Run Pre-Installation Scripts
+  hosts:
+    - all
+  tasks:
+    - name: Pre | Copy pre-installation scripts to remote hosts
+      ignore_errors: true
+      copy:
+        src: >-
+          {{ .work_dir }}/scripts/pre_install_{{ .inventory_hostname }}.sh
+        dest: >-
+          /etc/kubekey/scripts/pre_install_{{ .inventory_hostname }}.sh
+        mode: 0755
+      register: pre_install_copy_result
+
+    - name: Pre | Execute pre-installation scripts on remote hosts
+      when: .pre_install_copy_result.error | empty
+      command: |
+        for file in /etc/kubekey/scripts/pre_install_*.sh; do
+          if [ -f "$file" ]; then
+            # Make the script executable and run it
+            chmod +x "$file"
+            "$file"
+          fi
+        done

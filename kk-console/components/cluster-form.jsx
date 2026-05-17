@@ -1,100 +1,91 @@
-// 集群配置表单 — 数据驱动: 从后端拉 schema, 渲染表单 / YAML
-// 数据流:
-//   schema (静态)  ←- kkApi.getSchema()  或  FALLBACK_SCHEMA
-//   values (动态)  ←- kkApi.getSchemaConfig() 初始,用户编辑实时更新
-//   YAML 文本       ←- 由 values 序列化, 编辑时反向解析回 values
+// 集群配置表单 — 完全数据驱动
+//   - 通过 listSchemas 自动发现所有可用 schema(kubernetes.json / camp.json / ...)
+//   - 每个 schema 渲染为一个 tab,各自维护表单值
+//   - 保存时整体 map 提交: { "kubernetes.json": {...}, "camp.json": {...} }
+//   - 新增组件: 后端 schema/ 目录扔一个 .json 即可,前端 0 改动
 
-// saveRef: React.MutableRefObject — 父组件通过它触发保存
 function ClusterForm({ saveRef }) {
-  const [tab, setTab] = React.useState("kubernetes");
-  const [mode, setMode] = React.useState("form"); // form | yaml
-  const [schema, setSchema] = React.useState(null);
-  const [uiSchema, setUiSchema] = React.useState({});
-  const [values, setValues] = React.useState({});
-  const [yaml, setYaml] = React.useState("");
+  const [schemas, setSchemas] = React.useState([]);     // [{ name, dataSchema, uiSchema }]
+  const [activeName, setActiveName] = React.useState(null);
+  const [mode, setMode] = React.useState("form");
+  const [valuesMap, setValuesMap] = React.useState({}); // { name → values }
+  const [yamlMap, setYamlMap] = React.useState({});     // { name → yaml text }
   const [loading, setLoading] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState(null);
 
-  // 初次加载 schema + 已保存 config
+  // 初次加载: 拉 schemas + 已保存 config
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
-      let s, ui, cfg;
+      const list = await window.loadSchemas();
+
+      let cfg = {};
       try {
-        const raw = await window.kkApi.getSchema("kubernetes.json");
-        // 后端直接返回 raw JSON Schema, 或已包装成 { dataSchema, uiSchema }
-        if (raw && raw.dataSchema) {
-          s = raw.dataSchema;
-          ui = raw.uiSchema || {};
-        } else {
-          s = raw;
-          ui = {};
-        }
+        cfg = (await window.kkApi.getSchemaConfig()) || {};
       } catch (e) {
-        console.warn("拉取 schema 失败,使用内置 fallback:", e.message);
-        s = window.FALLBACK_SCHEMA.dataSchema;
-        ui = window.FALLBACK_SCHEMA.uiSchema;
+        cfg = {};
       }
 
-      try {
-        cfg = await window.kkApi.getSchemaConfig();
-        // 后端返回的可能是 { "kubernetes.json": {...} }
-        if (cfg && cfg["kubernetes.json"]) cfg = cfg["kubernetes.json"];
-      } catch (e) {
-        cfg = null;
+      const vMap = {};
+      const yMap = {};
+      for (const s of list) {
+        const saved = cfg[s.name];
+        const initial = saved && Object.keys(saved).length
+          ? saved
+          : extractDefaults(s.dataSchema);
+        vMap[s.name] = initial;
+        yMap[s.name] = jsonToYaml(initial);
       }
 
       if (cancelled) return;
-      const initial = cfg && Object.keys(cfg).length ? cfg : extractDefaults(s);
-      setSchema(s);
-      setUiSchema(ui);
-      setValues(initial);
-      setYaml(jsonToYaml(initial));
+      setSchemas(list);
+      setActiveName(list[0]?.name || null);
+      setValuesMap(vMap);
+      setYamlMap(yMap);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // values 改变 → 同步 yaml(只在表单模式下,避免 yaml 编辑被打断)
+  // values 变化时同步当前 tab 的 yaml(form 模式下)
   React.useEffect(() => {
-    if (mode === "form") setYaml(jsonToYaml(values));
-  }, [values, mode]);
+    if (!activeName || mode !== "form") return;
+    setYamlMap((prev) => ({ ...prev, [activeName]: jsonToYaml(valuesMap[activeName] || {}) }));
+  }, [valuesMap, mode, activeName]);
 
-  // 保存配置到后端
+  // 保存: 整体 map 提交到后端
   const saveConfig = React.useCallback(async () => {
-    if (!values || !Object.keys(values).length) return;
-    setSaving(true);
+    if (!Object.keys(valuesMap).length) return;
     setSaveError(null);
     try {
-      await window.kkApi.saveSchemaConfig(values);
+      await window.kkApi.saveSchemaConfig(valuesMap);
     } catch (e) {
       console.warn("保存配置失败:", e.message);
       setSaveError(e.message);
       throw e;
-    } finally {
-      setSaving(false);
     }
-  }, [values]);
+  }, [valuesMap]);
 
-  // 把 save 函数挂到 saveRef 上,供父组件(goNext)调用
   React.useEffect(() => {
     if (saveRef) saveRef.current = saveConfig;
   }, [saveRef, saveConfig]);
 
-  // YAML 直接编辑 → 反向同步 values
+  // YAML 直接编辑 → 反向同步当前 tab 的 values
   const onYamlChange = (text) => {
-    setYaml(text);
+    setYamlMap((prev) => ({ ...prev, [activeName]: text }));
     try {
       const parsed = window.parseYaml(text);
-      setValues(parsed);
+      setValuesMap((prev) => ({ ...prev, [activeName]: parsed }));
     } catch (e) {
-      // 语法错误时不更新 values,但保留文本编辑
+      // 语法错误不阻断文本编辑
     }
   };
 
   const onFieldChange = (path, v) => {
-    setValues((prev) => setDeep(prev, path, v));
+    setValuesMap((prev) => ({
+      ...prev,
+      [activeName]: setDeep(prev[activeName] || {}, path, v),
+    }));
   };
 
   if (loading) {
@@ -107,14 +98,35 @@ function ClusterForm({ saveRef }) {
     );
   }
 
+  const active = schemas.find((s) => s.name === activeName);
+  if (!active) {
+    return (
+      <section className="section">
+        <div className="config-card" style={{ textAlign: "center", color: "var(--text-tertiary)", padding: 48 }}>
+          未发现可用配置 Schema
+        </div>
+      </section>
+    );
+  }
+
+  const values = valuesMap[activeName] || {};
+  const yaml   = yamlMap[activeName]   || "";
+
   return (
     <section className="section">
       <h3 className="section-title">安装配置</h3>
 
+      {/* tabs — schema 列表动态生成 */}
       <div className="tabs">
-        <div className={`tab ${tab === "kubernetes" ? "active" : ""}`} onClick={() => setTab("kubernetes")}>
-          {schema?.title || "Kubernetes"}
-        </div>
+        {schemas.map((s) => (
+          <div
+            key={s.name}
+            className={`tab ${activeName === s.name ? "active" : ""}`}
+            onClick={() => setActiveName(s.name)}
+          >
+            {s.dataSchema?.title || s.name.replace(/\.json$/, "")}
+          </div>
+        ))}
       </div>
 
       <div className="segmented">
@@ -128,10 +140,19 @@ function ClusterForm({ saveRef }) {
 
       {mode === "form" ? (
         <div className="config-card">
-          <SchemaForm schema={schema} values={values} onChange={onFieldChange} uiSchema={uiSchema} />
+          <SchemaForm
+            schema={active.dataSchema}
+            values={values}
+            onChange={onFieldChange}
+            uiSchema={active.uiSchema}
+          />
         </div>
       ) : (
-        <YamlPreview yaml={yaml} onChange={onYamlChange} clusterName={values?.kubernetes?.cluster_name || "cluster"} />
+        <YamlPreview
+          yaml={yaml}
+          onChange={onYamlChange}
+          clusterName={values?.kubernetes?.cluster_name || activeName.replace(/\.json$/, "")}
+        />
       )}
 
       {saveError && (

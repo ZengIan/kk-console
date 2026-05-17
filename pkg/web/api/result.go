@@ -184,6 +184,7 @@ type IPTable struct {
 	SSHReachable  bool   `json:"sshReachable"`  // Whether SSH port is reachable on this IP
 	SSHAuthorized bool   `json:"sshAuthorized"` // Whether SSH is authorized for this IP
 	Added         bool   `json:"added"`         // Indicates whether this IP has already been added to the inventory
+	Hostname      string `json:"hostname"`      // Hostname retrieved via SSH when authorized
 }
 
 // IPHostCheckData represents an IP address entry and its SSH connect data information.
@@ -197,9 +198,10 @@ type IPHostCheckData struct {
 
 // IPHostCheckResult returns ip host check result
 type IPHostCheckResult struct {
-	IP      string `json:"ip"`
-	SSHPort string `json:"sshPort"`
-	Status  string `json:"status"`
+	IP       string `json:"ip"`
+	SSHPort  string `json:"sshPort"`
+	Status   string `json:"status"`
+	Hostname string `json:"hostname"` // Hostname retrieved via SSH when connection succeeds
 }
 
 // SchemaFile2Table converts a SchemaFile and its filename into a SchemaTable structure.

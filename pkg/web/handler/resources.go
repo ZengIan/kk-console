@@ -247,7 +247,7 @@ func (h ResourceHandler) ListIP(request *restful.Request, response *restful.Resp
 				if !isIPOnline(ip) {
 					continue
 				}
-				reachable, authorized := isSSHAuthorized(ip, sshPort)
+				reachable, authorized, hostname := isSSHAuthorized(ip, sshPort)
 
 				mu.Lock()
 				ipTable = append(ipTable, api.IPTable{
@@ -256,6 +256,7 @@ func (h ResourceHandler) ListIP(request *restful.Request, response *restful.Resp
 					SSHReachable:  reachable,
 					SSHAuthorized: authorized,
 					Added:         added,
+					Hostname:      hostname,
 				})
 				mu.Unlock()
 			}
@@ -579,75 +580,73 @@ func isValidICMPReply(n int, reply []byte, src net.Addr, expectedIP net.IP, prot
 // ===========================================================================
 
 // isSSHAuthorized checks if SSH authorization to the given IP is possible using the local private key.
-// It returns two booleans: the first indicates if the SSH port (22) is reachable, and the second indicates if SSH authorization using the local private key is successful.
-// The function attempts to find the user's private key, read and parse it, and then connect via SSH.
-func isSSHAuthorized(ipStr, sshPort string) (bool, bool) {
-	// First check if port 22 is reachable on the target IP address.
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%s", ipStr, sshPort), time.Second)
+// It returns reachable, authorized, and the remote hostname (empty if not authorized).
+func isSSHAuthorized(ipStr, sshPort string) (bool, bool, string) {
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ipStr, sshPort), time.Second)
 	if err != nil {
-		klog.V(4).InfoS("port not reachable", "port", "22", "ip", ipStr, "error", err)
-		return false, false
+		klog.V(4).InfoS("port not reachable", "port", sshPort, "ip", ipStr, "error", err)
+		return false, false, ""
 	}
 	defer conn.Close()
 
-	// Set default SSH user and private key path.
 	sshUser := "root"
 	sshPrivateKey := "/root/.ssh/id_rsa"
-	// Try to get the current user and set the SSH user and private key path accordingly.
 	if currentUser, err := user.Current(); err == nil {
 		sshUser = currentUser.Username
 		sshPrivateKey = filepath.Join(currentUser.HomeDir, ".ssh/id_rsa")
 	}
 
-	// Check if the private key file exists.
 	if _, err := os.Stat(sshPrivateKey); err != nil {
-		// Port 22 is reachable, but private key is not found.
 		klog.V(4).InfoS("private key file not found", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false
+		return true, false, ""
 	}
 
-	// Read the private key file.
 	key, err := os.ReadFile(sshPrivateKey)
 	if err != nil {
-		// Port 22 is reachable, but private key cannot be read.
 		klog.V(4).InfoS("cannot read private key", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false
+		return true, false, ""
 	}
 
-	// Parse the private key.
 	privateKey, err := ssh.ParsePrivateKey(key)
 	if err != nil {
-		// Port 22 is reachable, but private key cannot be parsed.
 		klog.V(4).InfoS("cannot parse private key", "keyPath", sshPrivateKey, "ip", ipStr, "error", err)
-		return true, false
+		return true, false, ""
 	}
 
-	// Prepare SSH authentication method.
-	auth := []ssh.AuthMethod{ssh.PublicKeys(privateKey)}
-
-	// Attempt to establish an SSH connection to the target IP.
-	sshClient, err := ssh.Dial("tcp", ipStr+":22", &ssh.ClientConfig{
+	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(ipStr, sshPort), &ssh.ClientConfig{
 		User:            sshUser,
-		Auth:            auth,
+		Auth:            []ssh.AuthMethod{ssh.PublicKeys(privateKey)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         time.Second,
 	})
 	if err != nil {
-		// Port 22 is reachable, but SSH authentication failed.
 		klog.V(4).InfoS("SSH connection failed", "ip", ipStr, "error", err)
-		return true, false
+		return true, false, ""
 	}
 	defer sshClient.Close()
 
-	// Port 22 is reachable and SSH authentication succeeded.
-	return true, true
+	hostname := runSSHCommand(sshClient, "hostname")
+	return true, true, strings.TrimSpace(hostname)
 }
 
-func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent string) (bool, bool) {
+// runSSHCommand runs a single command on an established SSH client and returns stdout output.
+func runSSHCommand(client *ssh.Client, cmd string) string {
+	session, err := client.NewSession()
+	if err != nil {
+		return ""
+	}
+	defer session.Close()
+	var buf strings.Builder
+	session.Stdout = &buf
+	_ = session.Run(cmd)
+	return buf.String()
+}
+
+func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent string) (bool, bool, string) {
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ipStr, sshPort), time.Second)
 	if err != nil {
 		klog.V(4).InfoS("port not reachable", "port", sshPort, "ip", ipStr, "error", err)
-		return false, false
+		return false, false, ""
 	}
 	defer conn.Close()
 
@@ -701,25 +700,18 @@ func checkSSHConnect(ipStr, sshPort, sshUser, sshPwd, sshPrivateKeyContent strin
 	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(ipStr, sshPort), config)
 	if err != nil {
 		klog.V(4).InfoS("SSH connection failed", "error", err)
-		return true, false
+		return true, false, ""
 	}
 	defer sshClient.Close()
 
-	session, err := sshClient.NewSession()
-	if err != nil {
-		klog.V(4).InfoS("SSH session creation failed", "error", err)
-		return true, false
-	}
-	defer session.Close()
-
-	err = session.Run("echo 'SSH connection test'")
-	if err != nil {
-		klog.V(4).InfoS("SSH command execution failed", "error", err)
-		return true, false
+	hostname := runSSHCommand(sshClient, "hostname")
+	if hostname == "" {
+		klog.V(4).InfoS("SSH command execution failed", "ip", ipStr)
+		return true, false, ""
 	}
 
 	klog.V(4).InfoS("SSH connection successful", "user", sshUser)
-	return true, true
+	return true, true, strings.TrimSpace(hostname)
 }
 
 func findSSHPrivateKeys() []string {
@@ -777,8 +769,10 @@ func (h ResourceHandler) PreCheckHost(request *restful.Request, response *restfu
 			if currentHost.SSHUser == "" {
 				status = _const.SSHVerifyStatusSSHIncomplete
 			}
+			var hostname string
 			if status == "" {
-				reachable, authorized := checkSSHConnect(currentHost.IP, currentHost.SSHPort,
+				var reachable, authorized bool
+				reachable, authorized, hostname = checkSSHConnect(currentHost.IP, currentHost.SSHPort,
 					currentHost.SSHUser, currentHost.SSHPwd, currentHost.SSHPrivateKeyContent)
 				klog.V(4).InfoS("check ssh connect result", "ip", currentHost.IP, "port", currentHost.SSHPort, "reachable", reachable, "authorized", authorized)
 				switch {
@@ -799,9 +793,10 @@ func (h ResourceHandler) PreCheckHost(request *restful.Request, response *restfu
 				status = _const.SSHVerifyStatusSSHIncomplete
 			}
 			result[idx] = api.IPHostCheckResult{
-				IP:      currentHost.IP,
-				SSHPort: currentHost.SSHPort,
-				Status:  status,
+				IP:       currentHost.IP,
+				SSHPort:  currentHost.SSHPort,
+				Status:   status,
+				Hostname: hostname,
 			}
 		}(i, host)
 	}

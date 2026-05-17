@@ -26,10 +26,11 @@ window.loadSchemas = function loadSchemas() {
       list.map(async (s) => {
         try {
           const raw = await window.kkApi.getSchema(s.name);
-          // 后端可能返回 { dataSchema, uiSchema } 或裸 schema
-          const dataSchema = raw?.dataSchema || raw;
-          const uiSchema   = raw?.uiSchema   || {};
-          return { name: s.name, dataSchema, uiSchema };
+          // 后端可能返回 { dataSchema, uiSchema, playbookPath } 或裸 schema
+          const dataSchema    = raw?.dataSchema    || raw;
+          const uiSchema      = raw?.uiSchema      || {};
+          const playbookPath  = raw?.playbookPath  || {};
+          return { name: s.name, dataSchema, uiSchema, playbookPath };
         } catch (e) {
           console.warn(`getSchema(${s.name}) 失败:`, e.message);
           return null;

@@ -369,11 +369,25 @@ function App() {
       try {
         await saveNodesToInventory(nodes);
 
+        // 从 schema 里取 install playbook 路径
+        const schemas = await window.loadSchemas();
+        const INSTALL_LABEL = "install.kubekey.kubesphere.io/schema";
+        let playbookFile = "";
+        for (const s of schemas) {
+          if (s.playbookPath?.[INSTALL_LABEL]) {
+            playbookFile = s.playbookPath[INSTALL_LABEL];
+            break;
+          }
+        }
+        if (!playbookFile) {
+          throw new Error("schema 中未配置 install playbook 路径（install.kubekey.kubesphere.io/schema）");
+        }
+
         const pb = await window.kkApi.createPlaybook({
           apiVersion: "core.kubekey.kubesphere.io/v1",
           kind: "Playbook",
           metadata: { generateName: "install-", namespace: "default" },
-          spec: { playbook: "kubernetes.yaml", inventory: "default" },
+          spec: { playbook: playbookFile, inventory: "default" },
         });
 
         setPlaybook({

@@ -113,6 +113,8 @@ type InventoryHostTable struct {
 	Vars                 map[string]any        `json:"vars"`                 // Additional host variables
 	Groups               []InventoryHostGroups `json:"groups"`               // Groups the host belongs to
 	Arch                 string                `json:"arch"`                 // Architecture of the host
+	Hostname             string                `json:"hostname"`             // OS-level hostname gathered from the host
+	OS                   string                `json:"os"`                   // OS release info gathered from the host (e.g. Ubuntu 22.04 LTS)
 }
 
 // InventoryHostGroups represents the group information for a host in the inventory.

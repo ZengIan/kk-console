@@ -398,9 +398,24 @@ func (h *InventoryHandler) ListHosts(request *restful.Request, response *restful
 			item.Status = api.ResultFailed
 			// Extract architecture info from playbook result.
 			results := variable.Extension2Variables(playbook.Status.Result)
-			if arch, ok := results[item.Name].(string); ok && arch != "" {
-				item.Arch = arch
-				item.Status = api.ResultSucceed
+			switch entry := results[item.Name].(type) {
+			case string:
+				// Backward compatibility: result was a plain arch string per host.
+				if entry != "" {
+					item.Arch = entry
+					item.Status = api.ResultSucceed
+				}
+			case map[string]any:
+				if arch, ok := entry["arch"].(string); ok && arch != "" {
+					item.Arch = arch
+					item.Status = api.ResultSucceed
+				}
+				if hn, ok := entry["hostname"].(string); ok {
+					item.Hostname = hn
+				}
+				if os, ok := entry["os"].(string); ok {
+					item.OS = os
+				}
 			}
 		}
 	}

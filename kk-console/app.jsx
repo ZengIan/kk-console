@@ -261,7 +261,7 @@ function inventoryHostsToNodes(items) {
                : isWorker               ? "worker"
                : "";
     return {
-      name:       h.name,
+      name:       h.hostname || h.name,
       address:    h.internalIPV4 || h.sshHost || "",
       port:       parseInt(h.sshPort, 10) || 22,
       user:       h.sshUser || "root",

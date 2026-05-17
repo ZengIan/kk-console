@@ -242,7 +242,7 @@ function NodeSettings({ nodes = [], onNodesChange }) {
       {/* 弹窗 */}
       {openModal === "manual" && <ManualAddModal onClose={() => setOpenModal(null)} onAdd={addNodes} />}
       {openModal === "upload" && <FileUploadModal onClose={() => setOpenModal(null)} />}
-      {openModal === "scan"   && <NodeScanModal   onClose={() => setOpenModal(null)} onAdd={addNodes} />}
+      {openModal === "scan"   && <NodeScanModal   onClose={() => setOpenModal(null)} onAdd={addNodes} existingNodes={nodes} />}
       {openModal === "edit" && editIndex !== null && (
         <EditNodeModal
           node={nodes[editIndex]}

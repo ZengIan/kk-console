@@ -523,18 +523,16 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
                   <th style={{ width: 48, padding: "10px 16px", textAlign: "left" }}>
                     <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                   </th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>主机名</th>
                   <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>节点 IP 地址</th>
                   <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>状态</th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.length === 0 ? (
-                  <tr><td colSpan={4} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
+                  <tr><td colSpan={3} style={{ textAlign: "center", padding: "32px 0", color: "var(--text-tertiary)" }}>未发现可用节点</td></tr>
                 ) : pageItems.map((r) => {
                   const ip = r.address || r.ip;
                   const alreadyAdded = !!(r.added || r.Added) || existingNodes.some((n) => n.address === ip);
-                  const hostname = r.hostname || ip.replace(/\./g, "-");
                   return (
                     <tr
                       key={ip}
@@ -544,7 +542,6 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
                       <td style={{ padding: "10px 16px" }}>
                         <input type="checkbox" checked={selected.has(ip)} disabled={alreadyAdded} onChange={() => toggleSelect(ip)} onClick={(e) => e.stopPropagation()} />
                       </td>
-                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{hostname}</td>
                       <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{ip}</td>
                       <td style={{ padding: "10px 16px" }}>
                         {alreadyAdded ? (

@@ -1,0 +1,279 @@
+{
+  "dataSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Kubernetes",
+    "description": "Kubernetes 集群配置",
+    "namespace": "kube-system",
+    "logo": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5LjkwMjcgMjIuNDE5OEwyMC45Njc0IDIxLjkwNzJMMjEuMjQzNCAyMC43NjM2TDIwLjQ5NDIgMTkuODE3MkgxOS4zMTEyTDE4LjU2MiAyMC43NjM2TDE4LjgzOCAyMS45MDcyTDE5LjkwMjcgMjIuNDE5OFoiIGZpbGw9IiMzMjZERTYiLz4KPHBhdGggZD0iTTI3LjU1MjggMjEuODI4M0MyNy42MzE3IDIxLjAwMDIgMjcuNTkyMiAyMC4xNzIxIDI3LjM5NTEgMTkuMzQ0QzI3LjE5NzkgMTguNTE1OSAyNi44ODI0IDE3LjcyNzIgMjYuNDQ4NyAxNy4wMTc0TDIzLjQ5MTEgMTkuNjk4OUMyMy40MTIzIDE5Ljc3NzggMjMuMzcyOCAxOS44NTY3IDIzLjMzMzQgMTkuOTc1QzIzLjI1NDUgMjAuMzI5OSAyMy40NTE3IDIwLjY4NDggMjMuODA2NiAyMC43NjM2TDI3LjU1MjggMjEuODI4M1oiIGZpbGw9IiMzMjZERTYiLz4KPHBhdGggZD0iTTIyLjAzMjEgMTcuODQ1NUwyNS4yNjU3IDE1LjU1ODRDMjQuMDgyNyAxNC4zNzU0IDIyLjU0NDcgMTMuNjI2MSAyMC44MDk3IDEzLjQyOUwyMS4wNDYzIDE3LjQxMThDMjEuMDQ2MyAxNy41MzAxIDIxLjA4NTcgMTcuNjA4OSAyMS4xNjQ2IDE3LjY4NzhDMjEuMzYxNyAxNy45NjM4IDIxLjc1NjEgMTguMDAzMyAyMi4wMzIxIDE3Ljg0NTVaIiBmaWxsPSIjMzI2REU2Ii8+CjxwYXRoIGQ9Ik0xOC45MTY5IDEzLjM4OTVMMTguMTI4MiAxMy41NDczQzE2Ljc0OCAxMy44NjI3IDE1LjQ4NjEgMTQuNTcyNiAxNC40NjA5IDE1LjU1ODRMMTcuNzMzOCAxNy44ODVDMTcuNzU4NSAxNy44OTMyIDE3Ljc4MTUgMTcuOTAxNCAxNy44MDM1IDE3LjkwOTNDMTcuODg2OCAxNy45MzkyIDE3Ljk1NTcgMTcuOTYzOCAxOC4wNDkzIDE3Ljk2MzhDMTguNDA0MiAxNy45NjM4IDE4LjcxOTcgMTcuNjg3OCAxOC43MTk3IDE3LjMzMjlMMTguOTE2OSAxMy4zODk1WiIgZmlsbD0iIzMyNkRFNiIvPgo8cGF0aCBkPSJNMTYuMjM1NCAxOS42MjAxTDEzLjMxNzMgMTcuMDE3NEMxMi40NDk3IDE4LjQ3NjUgMTIuMDU1NCAyMC4xNzIxIDEyLjE3MzcgMjEuODI4M0wxNS45OTg4IDIwLjcyNDJDMTYuMTU2NSAyMC42ODQ4IDE2LjIzNTQgMjAuNjQ1MyAxNi4zMTQyIDIwLjUyN0MxNi41NTA4IDIwLjI1MSAxNi41MTE0IDE5Ljg1NjcgMTYuMjM1NCAxOS42MjAxWiIgZmlsbD0iIzMyNkRFNiIvPgo8cGF0aCBkPSJNMTYuNTUwOCAyMy4wMTEzTDEyLjY0NjkgMjMuNjgxN0MxMy4xOTkgMjUuMjU5MSAxNC4zMDMxIDI2LjYzOTIgMTUuNjgzMyAyNy41NDYyTDE3LjE4MTggMjMuOTE4M0MxNy4yNjA2IDIzLjggMTcuMjYwNiAyMy42NDIzIDE3LjIyMTIgMjMuNTI0QzE3LjE4MTggMjMuMjA4NSAxNi44NjYzIDIzLjAxMTMgMTYuNTUwOCAyMy4wMTEzWiIgZmlsbD0iIzMyNkRFNiIvPgo8cGF0aCBkPSJNMTkuOTAyNyAyOC43Njg2QzIwLjQ5NDIgMjguNzY4NiAyMS4wNDYzIDI4LjY4OTggMjEuNTk4MyAyOC41NzE1QzIxLjg3NDQgMjguNDkyNiAyMi4xMTEgMjguNDUzMiAyMi4zNDc2IDI4LjQxMzdMMjAuNDU0OCAyNC45ODNDMjAuMzM2NSAyNC44NjQ3IDIwLjI1NzYgMjQuNzg1OSAyMC4xMzkzIDI0LjcwN0MxOS44NjMzIDI0LjU0OTMgMTkuNTQ3OCAyNC42MjgxIDE5LjM1MDYgMjQuODY0N0wxNy40MTg0IDI4LjM3NDNDMTguMjA3IDI4LjYxMDkgMTkuMDc0NiAyOC43Njg2IDE5LjkwMjcgMjguNzY4NloiIGZpbGw9IiMzMjZERTYiLz4KPHBhdGggZD0iTTI0LjA0MzIgMjcuNTA2OEMyNC45ODk2IDI2LjkxNTMgMjUuODE3NyAyNi4wODcyIDI2LjQwOTIgMjUuMTQwOEMyNi43MjQ3IDI0LjcwNyAyNi45NjEzIDI0LjE5NDQgMjcuMTU4NSAyMy42NDIzTDIzLjIxNTEgMjIuOTcxOUMyMy4wOTY4IDIyLjk3MTkgMjIuOTc4NSAyMy4wMTEzIDIyLjg2MDIgMjMuMDUwOEMyMi41ODQyIDIzLjE2OTEgMjIuNDI2NCAyMy40ODQ1IDIyLjUwNTMgMjMuOEwyNC4wNDMyIDI3LjUwNjhaIiBmaWxsPSIjMzI2REU2Ii8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMzIuOTU1MSA5LjI4ODQ2QzMzLjU0NjYgOS42MDM5MyAzNC4wMTk4IDEwLjExNjYgMzQuMjE3IDEwLjc0NzVMMzcuMjEzOSAyMy42NDIzQzM3LjI5MjggMjQuMzEyNyAzNy4xMzUxIDI0Ljk4MyAzNi43NDA3IDI1LjUzNTFMMjguNDIwMyAzNS44MjczQzI3Ljk4NjUgMzYuNDE4OCAyNy4zMTYxIDM2LjczNDIgMjYuNjA2MyAzNi42NTU0SDEzLjM1NjZDMTIuNjg2MyAzNi42MTU5IDEyLjAxNTkgMzYuMzAwNSAxMS41NDI3IDM1LjgyNzNMMy4yMjIxOSAyNS41MzUxQzIuODI3ODYgMjQuOTgzIDIuNjcwMTIgMjQuMzEyNyAyLjc4ODQyIDIzLjY0MjNMNS43NDU5NCAxMC42Njg2QzUuOTAzNjggOS45OTgyNiA2LjMzNzQ1IDkuNDg1NjIgNi45Mjg5NSA5LjIwOTU5TDE4Ljk1NjIgMy40MTI4NUMxOS4yNzE3IDMuMzMzOTggMTkuNjI2NiAzLjMzMzk4IDE5Ljk0MiAzLjMzMzk4QzIwLjI1NzUgMy4zMzM5OCAyMC42MTI0IDMuMzczNDIgMjAuOTI3OSAzLjUzMTE1TDMyLjk1NTEgOS4yODg0NlpNMzIuMjg0OCAyMy4wOTAyQzMyLjI4NDggMjMuMTI5NiAzMi4zMjQzIDIzLjEyOTYgMzIuMzYzNyAyMy4xMjk2QzMyLjcxODYgMjMuMjA4NSAzMy4wMzQxIDIzLjUyNCAzMy4wNzM1IDIzLjk1NzdDMzIuOTU1MiAyNC4yNzMyIDMyLjYzOTcgMjQuNTA5OCAzMi4yODQ4IDI0LjUwOThDMzIuMjA2IDI0LjUwOTggMzIuMTY2NSAyNC41MDk4IDMyLjA4NzcgMjQuNDcwNEMzMi4wNDgyIDI0LjQzMSAzMi4wNDgyIDI0LjQzMSAzMi4wMDg4IDI0LjQzMUMzMS45NjI2IDI0LjQzMSAzMS45Mjk5IDI0LjQxNzQgMzEuOTAyOSAyNC40MDYyQzMxLjg4MzcgMjQuMzk4MyAzMS44Njc0IDI0LjM5MTUgMzEuODUxMSAyNC4zOTE1QzMxLjczNDEgMjQuMzYyMyAzMS42Mzg4IDI0LjMxMTMgMzEuNTMzIDI0LjI1NDhDMzEuNDk2MiAyNC4yMzUxIDMxLjQ1OCAyNC4yMTQ3IDMxLjQxNzMgMjQuMTk0NEMzMS4zMzg0IDI0LjE5NDQgMzEuMjU5NiAyNC4xNTQ5IDMxLjE4MDcgMjQuMTE1NUgzMS4xNDEzQzMwLjc0NjkgMjMuOTU3NyAzMC4zMTMyIDIzLjgzOTQgMjkuODc5NCAyMy43NjA2SDI5Ljg0QzI5LjcyMTcgMjMuNzYwNiAyOS42MDM0IDIzLjggMjkuNTI0NSAyMy44Nzg5QzI5LjUyNDUgMjMuODc4OSAyOS41MjQ1IDIzLjkxODMgMjkuNDg1MSAyMy45MTgzTDI5LjE2OTYgMjMuODc4OUMyOC40NTk4IDI2LjEyNjYgMjYuOTIxOSAyOC4wMTk0IDI0LjkxMDggMjkuMjQxOEwyNS4wMjkxIDI5LjU1NzNDMjUuMDI5MSAyOS41NTczIDI0Ljk4OTYgMjkuNTU3MyAyNC45ODk2IDI5LjU5NjhDMjQuOTEwOCAyOS43MTUxIDI0LjkxMDggMjkuODcyOCAyNC45NTAyIDI5Ljk5MTFDMjUuMTA3OSAzMC4zODU0IDI1LjMwNTEgMzAuNzc5OCAyNS41ODExIDMxLjEzNDdWMzEuMjEzNUMyNS42NiAzMS4yOTI0IDI1LjY5OTQgMzEuMzMxOCAyNS43Mzg5IDMxLjQxMDdDMjUuODU3MiAzMS41MjkgMjUuOTM2IDMxLjY0NzMgMjYuMDE0OSAzMS44MDVDMjYuMDU0MyAzMS44NDQ1IDI2LjA5MzggMzEuODgzOSAyNi4wOTM4IDMxLjkyMzNDMjYuMDkzOCAzMS45MjMzIDI2LjEzMzIgMzEuOTIzMyAyNi4xMzMyIDMxLjk2MjhDMjYuMjEyMSAzMi4xNTk5IDI2LjIxMjEgMzIuMzU3MSAyNi4xNzI2IDMyLjU1NDNDMjYuMTMzMiAzMi43NTE0IDI1Ljk3NTUgMzIuOTA5MiAyNS44MTc3IDMyLjk4OEMyNS43OTMgMzIuOTk2MyAyNS43NzAxIDMzLjAwNDUgMjUuNzQ4MSAzMy4wMTI0QzI1LjY2NDggMzMuMDQyMiAyNS41OTU5IDMzLjA2NjkgMjUuNTAyMyAzMy4wNjY5QzI1LjE4NjggMzMuMDY2OSAyNC45MTA4IDMyLjg2OTcgMjQuNzUzIDMyLjU5MzdDMjQuNzEzNiAzMi41OTM3IDI0LjcxMzYgMzIuNTU0MyAyNC43MTM2IDMyLjU1NDNDMjQuNjkzOSAzMi41MzQ2IDI0LjY4NCAzMi41MTQ4IDI0LjY3NDIgMzIuNDk1MUMyNC42NjQzIDMyLjQ3NTQgMjQuNjU0NCAzMi40NTU3IDI0LjYzNDcgMzIuNDM2QzI0LjU1NTkgMzIuMzE3NyAyNC41MTY0IDMyLjE1OTkgMjQuNDc3IDMyLjAwMjJMMjQuMzk4MSAzMS43NjU2VjMxLjcyNjJDMjQuMjc5OCAzMS4yOTI0IDI0LjA4MjcgMzAuODk4MSAyMy44ODU1IDMwLjUwMzdDMjMuODA2NiAzMC4zODU0IDIzLjY4ODMgMzAuMzA2NiAyMy41NyAzMC4yNjcxQzIzLjU3IDMwLjI0NzQgMjMuNTcgMzAuMjM3NSAyMy41NjUxIDMwLjIzMjZDMjMuNTYwMiAzMC4yMjc3IDIzLjU1MDMgMzAuMjI3NyAyMy41MzA2IDMwLjIyNzdMMjMuMzcyOCAyOS45NTE3QzIzLjI3MjUgMjkuOTgxOCAyMy4xNjk2IDMwLjAxNDQgMjMuMDY0OCAzMC4wNDc3QzIyLjc1NzcgMzAuMTQ1MSAyMi40MzQ0IDMwLjI0NzggMjIuMTExIDMwLjMwNjZDMjEuNDAxMiAzMC41MDM3IDIwLjY5MTQgMzAuNTgyNiAxOS45ODE2IDMwLjU4MjZDMTguNzk4NiAzMC41ODI2IDE3LjY1NSAzMC4zODU0IDE2LjU1MDggMjkuOTUxN0wxNi4zOTMxIDMwLjI2NzFDMTYuMzkzMSAzMC4yODY4IDE2LjM5MzEgMzAuMjk2NyAxNi4zODgyIDMwLjMwMTZDMTYuMzgzMiAzMC4zMDY2IDE2LjM3MzQgMzAuMzA2NiAxNi4zNTM3IDMwLjMwNjZDMTYuMjM1NCAzMC4zNDYgMTYuMTE3MSAzMC40MjQ5IDE2LjAzODIgMzAuNTQzMkMxNS44NDEgMzAuOTM3NSAxNS42NDM5IDMxLjMzMTggMTUuNTI1NiAzMS43NjU2TDE1LjQ0NjcgMzIuMDAyMkMxNS40MjcgMzIuMDgxMSAxNS4zOTc0IDMyLjE1MDEgMTUuMzY3OCAzMi4yMTkxQzE1LjMzODMgMzIuMjg4MSAxNS4zMDg3IDMyLjM1NzEgMTUuMjg5IDMyLjQzNkMxNS4yNDk1IDMyLjQ3NTQgMTUuMjEwMSAzMi41MTQ4IDE1LjIxMDEgMzIuNTU0M0MxNS4xNzA3IDMyLjU1NDMgMTUuMTcwNyAzMi41OTM3IDE1LjE3MDcgMzIuNTkzN0MxNS4wMTI5IDMyLjg2OTcgMTQuNzM2OSAzMy4wNjY5IDE0LjQyMTQgMzMuMDY2OUMxNC4zNDI2IDMzLjA2NjkgMTQuMjI0MyAzMy4wMjc1IDE0LjE0NTQgMzIuOTg4QzEzLjc5MDUgMzIuNzkwOSAxMy42MzI4IDMyLjMxNzcgMTMuODI5OSAzMS45MjMzQzEzLjg2OTQgMzEuOTIzMyAxMy44Njk0IDMxLjg4MzkgMTMuODY5NCAzMS44ODM5QzEzLjg4OTEgMzEuODY0MiAxMy44OTg5IDMxLjg0NDUgMTMuOTA4OCAzMS44MjQ4QzEzLjkxODYgMzEuODA1IDEzLjkyODUgMzEuNzg1MyAxMy45NDgyIDMxLjc2NTZDMTQuMDAwMSAzMS42OTY0IDE0LjA0NDQgMzEuNjI3MyAxNC4wODQ0IDMxLjU2NDhDMTQuMTM1NyAzMS40ODQ3IDE0LjE4IDMxLjQxNTUgMTQuMjI0MyAzMS4zNzEzQzE0LjMwMzEgMzEuMjkyNCAxNC4zNDI2IDMxLjI1MyAxNC4zODIgMzEuMTc0MVYzMS4xMzQ3QzE0LjYxODYgMzAuNzc5OCAxNC44NTUyIDMwLjM4NTQgMTUuMDEyOSAyOS45OTExQzE1LjA1MjQgMjkuODcyOCAxNS4wNTI0IDI5LjcxNTEgMTQuOTczNSAyOS41OTY4QzE0Ljk3MzUgMjkuNTk2OCAxNC45MzQxIDI5LjU5NjggMTQuOTM0MSAyOS41NTczTDE1LjEzMTIgMjkuMjgxM0MxNC43MzY5IDI5LjA4NDEgMTQuNDIxNCAyOC44NDc1IDE0LjA2NjUgMjguNTcxNUMxMi41Mjg2IDI3LjM4ODUgMTEuNDI0NSAyNS43NzE3IDEwLjgzMyAyMy45NTc3TDEwLjQ3ODEgMjMuOTk3MkMxMC40NzgxIDIzLjk5NzIgMTAuNDc4MSAyMy45NTc3IDEwLjQzODYgMjMuOTU3N0MxMC4zNTk4IDIzLjg3ODkgMTAuMjQxNSAyMy44Mzk0IDEwLjEyMzIgMjMuODM5NEgxMC4wODM3QzkuNjEwNTMgMjMuOTE4MyA5LjIxNjE5IDI0LjAzNjYgOC43ODI0MiAyNC4xOTQ0SDguNzQyOTlDOC42NjQxMiAyNC4xOTQ0IDguNTg1MjUgMjQuMjMzOCA4LjUwNjM5IDI0LjI3MzJDOC40NjIzNCAyNC4yODc5IDguNDEyODMgMjQuMzA4IDguMzU5ODkgMjQuMzI5NkM4LjI3MDY0IDI0LjM2NTkgOC4xNzE2MyAyNC40MDYyIDguMDcyNjIgMjQuNDMxQzguMDYwNjggMjQuNDMxIDguMDQxNTEgMjQuNDI3MyA4LjAyMDU4IDI0LjQyMzRDNy45NzIzOSAyNC40MTQzIDcuOTE0ODggMjQuNDAzNSA3LjkxNDg4IDI0LjQzMUM3LjkxNDg4IDI0LjQ3MDQgNy45MTQ4OCAyNC40NzA0IDcuODc1NDUgMjQuNDcwNEM3Ljc5NjU4IDI0LjUwOTggNy43NTcxNSAyNC41MDk4IDcuNjc4MjggMjQuNTA5OEM3LjMyMzM4IDI0LjU0OTMgNi45Njg0OCAyNC4zMTI3IDYuODg5NjEgMjMuOTU3N0M2LjgxMDc0IDIzLjUyNCA3LjA4Njc4IDIzLjEyOTYgNy41MjA1NSAyMy4wNTA4QzcuNTQzMjIgMjMuMDI4MSA3LjU1Mjg2IDIzLjAxODUgNy41NjQ0NSAyMy4wMTQ0QzcuNTczMDIgMjMuMDExMyA3LjU4MjY1IDIzLjAxMTMgNy41OTk0MSAyMy4wMTEzQzcuNjQ1NjEgMjMuMDExMyA3LjY3ODI4IDIyLjk5NzggNy43MDUzNCAyMi45ODY2QzcuNzI0NDggMjIuOTc4NyA3Ljc0MDgxIDIyLjk3MTkgNy43NTcxNSAyMi45NzE5QzcuODM2MDEgMjIuOTcxOSA3LjkxNDg4IDIyLjk2MjEgNy45OTM3NSAyMi45NTIyQzguMDcyNjIgMjIuOTQyMyA4LjE1MTQ4IDIyLjkzMjUgOC4yMzAzNSAyMi45MzI1QzguMzA5MjIgMjIuODkzIDguMzg4MDggMjIuODkzIDguNDY2OTUgMjIuODkzQzguOTQwMTUgMjIuODUzNiA5LjM3MzkyIDIyLjc3NDcgOS44MDc2OSAyMi42NTY0QzkuOTI1OTkgMjIuNTc3NiAxMC4wNDQzIDIyLjQ5ODcgMTAuMDgzNyAyMi4zODA0QzEwLjA4MzcgMjIuMzgwNCAxMC4xMjMyIDIyLjM4MDQgMTAuMTIzMiAyMi4zNDFMMTAuNDM4NiAyMi4yNjIxQzEwLjA4MzcgMjAuMDE0NCAxMC41OTY0IDE3LjcyNzIgMTEuODE4OCAxNS43OTVDMTEuODM4NSAxNS43NTU2IDExLjg1ODIgMTUuNzI2IDExLjg3OCAxNS42OTY0QzExLjg5NzcgMTUuNjY2OCAxMS45MTc0IDE1LjYzNzMgMTEuOTM3MSAxNS41OTc4TDExLjcwODIgMTUuMzY4OUMxMS43MjYyIDE1LjI1NTUgMTEuNjU0MiAxNS4xMTc4IDExLjU4MjIgMTUuMDQ1OEMxMS4yNjY3IDE0LjczMDMgMTAuODcyNCAxNC40OTM3IDEwLjQ3ODEgMTQuMjU3MUwxMC4yNDE1IDE0LjEzODhDMTAuMDgzNyAxNC4wNTk5IDkuOTI1OTkgMTMuOTgxIDkuODA3NjkgMTMuOTAyMkM5Ljc2ODI2IDEzLjkwMjIgOS42ODkzOSAxMy44MjMzIDkuNjg5MzkgMTMuODIzM0M5LjY4OTM5IDEzLjgyMzMgOS42ODkzOSAxMy43ODM5IDkuNjQ5OTYgMTMuNzgzOUM5LjMzNDQ5IDEzLjUwNzggOS4yNTU2MiAxMy4wMzQ2IDkuNDkyMjIgMTIuNjc5N0M5LjYxMDUzIDEyLjQ4MjYgOS44MDc2OSAxMi40MDM3IDEwLjA0NDMgMTIuNDAzN0MxMC4yNDE1IDEyLjQwMzcgMTAuNDM4NiAxMi40ODI2IDEwLjU5NjQgMTIuNjAwOUwxMC42MzU4IDEyLjY0MDNDMTAuNjU1NSAxMi42NiAxMC42NzUyIDEyLjY2OTkgMTAuNjk1IDEyLjY3OTdDMTAuNzE0NyAxMi42ODk2IDEwLjczNDQgMTIuNjk5NSAxMC43NTQxIDEyLjcxOTJDMTAuODEzMyAxMi43NzgzIDEwLjg2MjUgMTIuODM3NSAxMC45MTE4IDEyLjg5NjZDMTAuOTYxMSAxMi45NTU4IDExLjAxMDQgMTMuMDE0OSAxMS4wNjk2IDEzLjA3NDFDMTEuMDgxNSAxMy4wODYgMTEuMDk3MSAxMy4wOTggMTEuMTE0IDEzLjExMUMxMS4xNTMxIDEzLjE0MSAxMS4xOTk4IDEzLjE3NjggMTEuMjI3MyAxMy4yMzE4QzExLjUwMzMgMTMuNTQ3MyAxMS44NTgyIDEzLjg2MjcgMTIuMjEzMSAxNC4xMzg4QzEyLjI5MiAxNC4xNzgyIDEyLjM3MDkgMTQuMjE3NyAxMi40NDk3IDE0LjIxNzdDMTIuNDk1OSAxNC4yMTc3IDEyLjUyODYgMTQuMjA0MSAxMi41NTU3IDE0LjE5MjlDMTIuNTc0OCAxNC4xODUgMTIuNTkxMSAxNC4xNzgyIDEyLjYwNzUgMTQuMTc4MkgxMi42NDY5TDEyLjg4MzUgMTQuMzM1OUMxNC4xODQ4IDEyLjk1NTggMTUuODgwNSAxMS45Njk5IDE3LjczMzggMTEuNTc1NkMxNy44MDIyIDExLjU2NDIgMTcuODY5NiAxMS41NTI4IDE3LjkzNjQgMTEuNTQxNkMxOC4zMzIzIDExLjQ3NDggMTguNzAzNCAxMS40MTIyIDE5LjA3NDYgMTEuMzc4NEwxOS4xMTQgMTEuMDYzVjEwLjk4NDFDMTkuMjMyMyAxMC45MDUyIDE5LjI3MTggMTAuNzg2OSAxOS4zMTEyIDEwLjY2ODZDMTkuMzExMiAxMC4xOTU0IDE5LjMxMTIgOS43NjE2NSAxOS4yMzIzIDkuMzI3ODlWOS4yODg0NUMxOS4yMzIzIDkuMjA5NTggMTkuMjMyMyA5LjEzMDcyIDE5LjE5MjkgOS4wNTE4NUMxOS4xNTM1IDguODk0MTIgMTkuMTE0IDguNzM2MzcgMTkuMTE0IDguNTc4NjVWOC4zODE0OEMxOS4xMTQgOC4xODQzMSAxOS4xOTI5IDcuOTg3MTQgMTkuMzUwNiA3LjgyOTQxQzE5LjU0NzggNy42MzIyNCAxOS43ODQ0IDcuNTEzOTQgMjAuMDIxIDcuNTUzMzdDMjAuNDE1MyA3LjU5MjgxIDIwLjczMDggNy45ODcxNCAyMC42OTE0IDguMzgxNDhWOC42MTgwOEMyMC42NzE2IDguNjk2OTUgMjAuNjYxOCA4Ljc3NTgxIDIwLjY1MTkgOC44NTQ2OEMyMC42NDIxIDguOTMzNTUgMjAuNjMyMiA5LjAxMjQyIDIwLjYxMjUgOS4wOTEyOEMyMC42MTI1IDkuMTMwNzIgMjAuNjAyNiA5LjE3MDE1IDIwLjU5MjggOS4yMDk1OEMyMC41ODI5IDkuMjQ5MDIgMjAuNTczMSA5LjI4ODQ1IDIwLjU3MzEgOS4zMjc4OVY5LjM2NzMyQzIwLjQ5NDIgOS44NDA1MiAyMC40OTQyIDEwLjI3NDMgMjAuNDk0MiAxMC43MDgxQzIwLjUzMzYgMTAuODI2NCAyMC41NzMxIDEwLjk0NDcgMjAuNjkxNCAxMS4wMjM1VjEwLjk4NDFMMjAuNzMwOCAxMS4yOTk2QzIyLjU4NDIgMTEuNDk2NyAyNC4zOTgxIDEyLjIwNjUgMjUuODU3MiAxMy4zNTAxQzI2LjAxNDkgMTMuNTA3OCAyNi4xODI1IDEzLjY2NTYgMjYuMzUwMSAxMy44MjMzQzI2LjUxNzcgMTMuOTgxIDI2LjY4NTMgMTQuMTM4OCAyNi44NDMgMTQuMjk2NUwyNy4xNTg1IDE0LjA5OTNIMjcuMTk3OUMyNy4yMzczIDE0LjEzODggMjcuMzE2MiAxNC4xMzg4IDI3LjM1NTYgMTQuMTM4OEMyNy40MzQ1IDE0LjEzODggMjcuNTEzNCAxNC4wOTkzIDI3LjU5MjIgMTQuMDU5OUMyNy45NDcxIDEzLjgyMzMgMjguMzAyIDEzLjUwNzggMjguNTc4MSAxMy4xOTI0QzI4LjU5IDEzLjE4MDQgMjguNjA1NiAxMy4xNjg1IDI4LjYyMjYgMTMuMTU1NUMyOC42NjE3IDEzLjEyNTQgMjguNzA4MyAxMy4wODk2IDI4LjczNTggMTMuMDM0NkMyOC44MTQ3IDEyLjkxNjMgMjguOTMzIDEyLjc5OCAyOS4wNTEzIDEyLjY3OTdDMjkuMDkwNyAxMi42Nzk3IDI5LjEzMDIgMTIuNjQwMyAyOS4xNjk2IDEyLjYwMDlMMjkuMjA5IDEyLjU2MTRDMjkuMzY2OCAxMi40NDMxIDI5LjU2MzkgMTIuMzY0MyAyOS43NjExIDEyLjM2NDNDMjkuOTU4MyAxMi4zNjQzIDMwLjE5NDkgMTIuNDgyNiAzMC4zMTMyIDEyLjY0MDNDMzAuNTg5MiAxMi45OTUyIDMwLjUxMDMgMTMuNDY4NCAzMC4xNTU0IDEzLjc0NDRDMzAuMTU1NCAxMy43NTk1IDMwLjE2MTIgMTMuNzY4OCAzMC4xNjYxIDEzLjc3NjhDMzAuMTc0IDEzLjc4OTYgMzAuMTc5OCAxMy43OTg5IDMwLjE1NTQgMTMuODIzM0MzMC4xMzU3IDEzLjg0MyAzMC4xMTYgMTMuODUyOSAzMC4wOTYzIDEzLjg2MjhDMzAuMDc2NiAxMy44NzI2IDMwLjA1NjggMTMuODgyNSAzMC4wMzcxIDEzLjkwMjJDMjkuOTU4MyAxMy45NDE2IDI5Ljg4OTIgMTMuOTgxIDI5LjgyMDIgMTQuMDIwNUMyOS43NTEyIDE0LjA1OTkgMjkuNjgyMiAxNC4wOTkzIDI5LjYwMzQgMTQuMTM4OEwyOS4zNjY4IDE0LjI1NzFDMjguOTcyNCAxNC40OTM3IDI4LjYxNzUgMTQuNzMwMyAyOC4yNjI2IDE1LjA0NThDMjguMTgzNyAxNS4xMjQ2IDI4LjE0NDMgMTUuMjgyNCAyOC4xNDQzIDE1LjQwMDdWMTUuNDQwMUwyNy45MDc3IDE1LjY3NjdDMjguNTM4NyAxNi42NjI1IDI5LjAxMTkgMTcuNzY2NyAyOS4yODc5IDE4LjkxMDJDMjkuNTI0NSAyMC4wNTM4IDI5LjYwMzQgMjEuMjM2OCAyOS40NDU2IDIyLjM4MDRMMjkuNzYxMSAyMi40NTkzQzI5LjgwMDUgMjIuNTc3NiAyOS45MTg4IDIyLjY5NTkgMzAuMDM3MSAyMi43MzUzQzMwLjQ3MDkgMjIuODUzNiAzMC45NDQxIDIyLjkzMjUgMzEuMzc3OSAyMi45NzE5SDMxLjQxNzNDMzEuNDk2MiAyMy4wMTEzIDMxLjU3NSAyMy4wMTEzIDMxLjY1MzkgMjMuMDExM0MzMS44MTE2IDIzLjAxMTMgMzEuOTY5NCAyMy4wMTEzIDMyLjEyNzEgMjMuMDUwOEMzMi4yMDYgMjMuMDUwOCAzMi4yODQ4IDIzLjA1MDggMzIuMjg0OCAyMy4wOTAyWk0xMS43MDgyIDE1LjM2ODlMMTEuNzAwNSAxNS4zNjEyVjE1LjQwMDdDMTEuNzAzOSAxNS4zOTA0IDExLjcwNjUgMTUuMzc5NyAxMS43MDgyIDE1LjM2ODlaIiBmaWxsPSIjMzI2REU2Ii8+Cjwvc3ZnPgo=",
+    "priority": 1,
+    "type": "object",
+    "properties": {
+      "kubernetes": {
+        "type": "object",
+        "title": "集群配置",
+        "properties": {
+          "cluster_name": {
+            "type": "string",
+            "title": "集群名称",
+            "default": "host-cluster"
+          },
+          "kube_version": {
+            "type": "string",
+            "title": "Kubernetes 版本",
+            "enum": [
+              "v1.23.17",
+              "v1.24.17",
+              "v1.28.15",
+              "v1.29.15",
+              "v1.33.4"
+            ],
+            "default": "v1.33.4"
+          },
+          "control_plane_endpoint": {
+            "type": "object",
+            "title": "控制平面端点",
+            "properties": {
+              "host": {
+                "type": "string",
+                "title": "集群访问地址",
+                "description": "集群的统一访问入口地址，通常为负载均衡域名。",
+                "default": "lb.rise.io"
+              },
+              "port": {
+                "type": "integer",
+                "title": "端口",
+                "default": 6443,
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "type": {
+                "type": "string",
+                "title": "路由方式",
+                "enum": [
+                  "local",
+                  "haproxy"
+                ],
+                "default": "local"
+              },
+              "kubelet": {
+                "type": "object",
+                "properties": {
+                  "max_pods": {
+                    "type": "integer",
+                    "title": "每节点最大 Pod 数",
+                    "default": 110,
+                    "minimum": 1
+                  }
+                }
+              }
+            },
+            "required": [
+              "host",
+              "port",
+              "type"
+            ]
+          }
+        },
+        "required": [
+          "cluster_name",
+          "kube_version",
+          "control_plane_endpoint"
+        ]
+      },
+      "cri": {
+        "type": "object",
+        "title": "容器运行时",
+        "properties": {
+          "container_manager": {
+            "type": "string",
+            "title": "类型",
+            "enum": [
+              "docker",
+              "containerd"
+            ],
+            "default": "containerd"
+          }
+        },
+        "required": [
+          "container_manager"
+        ]
+      },
+      "cni": {
+        "type": "object",
+        "title": "网络设置",
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "网络插件",
+            "enum": [
+              "calico",
+              "cilium",
+              "flannel",
+              "hybridnet",
+              "kubeovn"
+            ],
+            "default": "calico"
+          },
+          "service_cidr": {
+            "type": "string",
+            "title": "Service CIDR",
+            "description": "用于为集群中的 Service 分配虚拟 IP（ClusterIP）的网段，支持 IPv4 和 IPv6。必须与 Pod CIDR、Node IP 网段互不重叠。",
+            "default": "10.233.0.0/18",
+            "pattern": "^(([0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,2})|((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))\\/(1[0-2][0-8]|[1-9][0-9]|[0-9]))|(([0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,2}),((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))\\/(1[0-2][0-8]|[1-9][0-9]|[0-9]))$"
+          },
+          "pod_cidr": {
+            "type": "string",
+            "title": "Pod CIDR",
+            "description": "用于为集群中的所有 Pod 分配 IP 地址的网段，支持 IPv4 和 IPv6。这是集群级别的地址池，必须与 Service CIDR、Node IP 网段互不重叠。",
+            "default": "10.233.64.0/18",
+            "pattern": "^(([0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,2})|((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))\\/(1[0-2][0-8]|[1-9][0-9]|[0-9]))|(([0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,2}),((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))\\/(1[0-2][0-8]|[1-9][0-9]|[0-9]))$"
+          },
+          "ipv4_mask_size": {
+            "type": "integer",
+            "title": "IPv4 掩码大小",
+            "description": "从集群 Pod CIDR 的 IPv4 地址池中为每个节点分配的子网掩码大小。",
+            "default": 24,
+            "minimum": 16,
+            "maximum": 30
+          },
+          "ipv6_mask_size": {
+            "type": "integer",
+            "title": "IPv6 掩码大小",
+            "description": "从集群 Pod CIDR 的 IPv6 地址池中为每个节点分配的子网掩码大小。",
+            "default": 64,
+            "minimum": 48,
+            "maximum": 126
+          }
+        },
+        "required": [
+          "type",
+          "service_cidr",
+          "pod_cidr",
+          "ipv4_mask_size",
+          "ipv6_mask_size"
+        ]
+      },
+      "image_registry": {
+        "type": "object",
+        "title": "镜像仓库配置",
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "安装类型",
+            "enum": [
+              "",
+              "harbor"
+            ],
+            "enumNames": [
+              "不安装",
+              "Harbor"
+            ],
+            "default": "harbor"
+          },
+          "harbor": {
+            "type": "object",
+            "title": "Harbor 配置",
+            "properties": {
+              "data_dir": {
+                "type": "string",
+                "title": "数据目录",
+                "default": "/data/registry"
+              }
+            }
+          },
+          "auth": {
+            "type": "object",
+            "title": "认证信息",
+            "properties": {
+              "registry": {
+                "type": "string",
+                "title": "仓库地址",
+                "default": "harbor.rise.io"
+              },
+              "username": {
+                "type": "string",
+                "title": "用户名",
+                "default": "admin"
+              },
+              "password": {
+                "type": "string",
+                "title": "密码",
+                "default": "Harbor12345"
+              },
+              "insecure": {
+                "type": "boolean",
+                "title": "跳过证书认证",
+                "default": true
+              }
+            }
+          }
+        },
+        "required": [
+          "auth"
+        ]
+      },
+      "storage_class": {
+        "type": "object",
+        "title": "存储设置",
+        "properties": {
+          "nfs": {
+            "type": "object",
+            "title": "NFS 共享存储",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "title": "启用",
+                "default": true,
+                "description": "需要在节点列表中为 NFS 服务器节点添加 nfs 角色"
+              },
+              "default": {
+                "type": "boolean",
+                "title": "设置为默认存储",
+                "default": true
+              },
+              "server": {
+                "type": "string",
+                "title": "NFS 服务器地址"
+              },
+              "path": {
+                "type": "string",
+                "title": "共享目录",
+                "default": "/data/share"
+              }
+            },
+            "required": ["server"]
+          }
+        }
+      }
+    },
+    "required": [
+      "kubernetes",
+      "cni",
+      "cri",
+      "image_registry"
+    ]
+  },
+  "uiSchema": {
+    "fields": {
+      "image_registry": {
+        "fields": {
+          "auth": {
+            "fields": {
+              "password": {
+                "ui:props": {
+                  "type": "password"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "playbookPath": {
+    "precheck.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/precheck.yaml",
+    "install.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/install.yaml",
+    "check.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/check.yaml",
+    "uninstall.kubekey.kubesphere.io/schema": "web-installer/kubernetes/playbooks/uninstall.yaml"
+  }
+}

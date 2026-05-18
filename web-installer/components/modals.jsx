@@ -7,7 +7,7 @@ function Modal({ title, onClose, footer, size, children }) {
   }, [onClose]);
 
   return (
-    <div className="modal-mask" onClick={onClose}>
+    <div className="modal-mask">
       <div
         className={`modal ${size === "lg" ? "modal-lg" : ""}`}
         onClick={(e) => e.stopPropagation()}
@@ -36,7 +36,7 @@ function ConfirmDialog({ title, description, confirmText = "确定", cancelText 
   }, [onCancel]);
 
   return (
-    <div className="modal-mask" onClick={onCancel}>
+    <div className="modal-mask">
       <div className="modal" style={{ width: 480, maxWidth: "90vw" }} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
           <h3 className="modal-title" style={{ visibility: "hidden" }}>{title}</h3>
@@ -70,6 +70,7 @@ function ManualAddModal({ onClose, onAdd }) {
   const [role, setRole] = React.useState("master");
   const [arch, setArch] = React.useState("amd64");
   const [os, setOs] = React.useState("");
+  const [internalIP, setInternalIP] = React.useState("");
   const [sshHost, setSshHost] = React.useState("");
   const [sshPort, setSshPort] = React.useState(22);
   const [sshUser, setSshUser] = React.useState("root");
@@ -89,6 +90,7 @@ function ManualAddModal({ onClose, onAdd }) {
     const host = {
       name: hostname,
       address: ip,
+      internalIP: internalIP || undefined,
       role,
       arch,
       os,
@@ -185,6 +187,14 @@ function ManualAddModal({ onClose, onAdd }) {
       </div>
 
       <div className="form-row">
+        <div className="form-row-label">内网 IP</div>
+        <div className="form-row-control">
+          <input className="input" placeholder="节点网卡上绑定的 IP（留空则使用节点 IP）" value={internalIP} onChange={(e) => setInternalIP(e.target.value)} />
+          <p className="form-row-hint">Kubernetes 集群内部通信用的 IP，云服务器需填写私网 IP</p>
+        </div>
+      </div>
+
+      <div className="form-row">
         <div className="form-row-label">SSH 地址</div>
         <div className="form-row-control">
           <div className="host-port">
@@ -207,8 +217,8 @@ function ManualAddModal({ onClose, onAdd }) {
         <div className="form-row-label">SSH 认证</div>
         <div className="form-row-control">
           <div className="choice-group" style={{ marginBottom: 12 }}>
-            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
-            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => { setAuthMethod("password"); setPassword(""); }}>密码</button>
+            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => { setAuthMethod("key"); setPassword(""); }}>密钥</button>
           </div>
           {authMethod === "password" ? (
             <div className="password-input">
@@ -414,8 +424,8 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
       ips.forEach((ip) => { next[ip] = prev[ip] === "ok" ? "ok" : "pending"; });
       return next;
     });
-    // 用户输入了凭据时验证所有节点；否则只验证非预授权节点
-    const hasCredentials = authUser && authSecret;
+    // 用户输入了凭据或修改了用户名时验证所有节点；否则只验证非预授权节点
+    const hasCredentials = authSecret || authUser !== "root";
     const toCheck = ips.filter((ip) => {
       if (hasCredentials) return true;
       const r = (results || []).find((x) => (x.ip || x.address) === ip);
@@ -455,6 +465,12 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
           window.showToast?.("所有节点 SSH 验证通过", "success");
         }
       } else {
+        // 没有需要验证的节点，恢复状态为 ok
+        setVerifyStatus((prev) => {
+          const next = {};
+          ips.forEach((ip) => { next[ip] = "ok"; });
+          return next;
+        });
         window.showToast?.("所有节点已通过 SSH 密钥预授权，无需手动验证", "success");
       }
     } catch (e) {
@@ -639,11 +655,12 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
 
   // ---- Step: 节点 SSH 认证 ----
   const selectedIps = [...selected];
+  const allVerified = selectedIps.length > 0 && selectedIps.every((ip) => verifyStatus[ip] === "ok");
   const authFooter = (
     <>
       <button className="btn btn-ghost" onClick={onClose}>取消</button>
       <button className="btn btn-secondary" onClick={() => { setStep("select"); setVerifyStatus({}); }}>上一步</button>
-      <button className="btn btn-primary" onClick={handleAuthConfirm}>确认</button>
+      <button className="btn btn-primary" onClick={handleAuthConfirm} disabled={!allVerified}>确认</button>
     </>
   );
 
@@ -735,8 +752,8 @@ function NodeScanModal({ onClose, onAdd, existingNodes = [] }) {
                 </div>
               )}
               <div className="choice-group" style={{ marginBottom: 12 }}>
-                <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
-                <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+                <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => { setAuthMethod("password"); setAuthSecret(""); }}>密码</button>
+                <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => { setAuthMethod("key"); setAuthSecret(""); }}>密钥</button>
               </div>
               {authMethod === "password" ? (
                 <div className="password-input">
@@ -769,13 +786,14 @@ function EditNodeModal({ node, onClose, onConfirm }) {
   });
   const [role, setRole] = React.useState(node?.role || "");
   const [arch, setArch] = React.useState(node?.arch || "amd64");
-  const [sshHost, setSshHost] = React.useState(node?.address || "");
+  const [sshHost, setSshHost] = React.useState(node?.sshHost || node?.address || "");
   const [sshPort, setSshPort] = React.useState(node?.port || 22);
   const [sshUser, setSshUser] = React.useState(node?.user || "root");
   const [authMethod, setAuthMethod] = React.useState(node?.privateKey ? "key" : "password");
   const [authSecret, setAuthSecret] = React.useState(node?.password || node?.privateKey || "");
   const [showPwd, setShowPwd] = React.useState(false);
   const [os, setOs] = React.useState(node?.os || "");
+  const [internalIP, setInternalIP] = React.useState(node?.internalIP || "");
 
   const setOctet = (i) => (e) => {
     const v = e.target.value.replace(/\D/g, "").slice(0, 3);
@@ -788,6 +806,8 @@ function EditNodeModal({ node, onClose, onConfirm }) {
       ...node,
       name: hostname,
       address: ip,
+      sshHost: sshHost,
+      internalIP: internalIP || undefined,
       port: Number(sshPort),
       user: sshUser,
       arch,
@@ -890,6 +910,14 @@ function EditNodeModal({ node, onClose, onConfirm }) {
       </div>
 
       <div className="form-row">
+        <div className="form-row-label">内网 IP</div>
+        <div className="form-row-control">
+          <input className="input" placeholder="节点网卡上绑定的 IP（留空则使用节点 IP）" value={internalIP} onChange={(e) => setInternalIP(e.target.value)} />
+          <p className="form-row-hint">Kubernetes 集群内部通信用的 IP，云服务器需填写私网 IP</p>
+        </div>
+      </div>
+
+      <div className="form-row">
         <div className="form-row-label">SSH 用户名</div>
         <div className="form-row-control">
           <input className="input" value={sshUser} onChange={(e) => setSshUser(e.target.value)} />
@@ -901,8 +929,8 @@ function EditNodeModal({ node, onClose, onConfirm }) {
         <div className="form-row-label">SSH 认证</div>
         <div className="form-row-control">
           <div className="choice-group" style={{ marginBottom: 12 }}>
-            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => setAuthMethod("password")}>密码</button>
-            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => setAuthMethod("key")}>密钥</button>
+            <button className={`choice-btn ${authMethod === "password" ? "active" : ""}`} onClick={() => { setAuthMethod("password"); setAuthSecret(""); }}>密码</button>
+            <button className={`choice-btn ${authMethod === "key" ? "active" : ""}`} onClick={() => { setAuthMethod("key"); setAuthSecret(""); }}>密钥</button>
           </div>
           {authMethod === "password" ? (
             <div className="password-input">

@@ -125,7 +125,7 @@ function PlaybookLogModal({ namespace, name, title, onClose }) {
               background: "#0d1117", color: "#e2e8f0",
               fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6,
               padding: "12px 16px", borderRadius: 8,
-              minHeight: 400, maxHeight: 560, overflowY: "auto",
+              minHeight: 480, maxHeight: 640, overflowY: "auto",
               whiteSpace: "pre-wrap", wordBreak: "break-all",
             }}
           >
@@ -145,6 +145,7 @@ function InstallStep({ namespace, name, onDone }) {
   const [phase, setPhase] = React.useState("Pending");
   const [log, setLog] = React.useState("");
   const logRef = React.useRef(null);
+  const [showAbortConfirm, setShowAbortConfirm] = React.useState(false);
 
   React.useEffect(() => {
     if (!name || !namespace) return;
@@ -166,6 +167,17 @@ function InstallStep({ namespace, name, onDone }) {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
+  const handleAbort = async () => {
+    setShowAbortConfirm(false);
+    try {
+      await window.kkApi.deletePlaybook(namespace, name);
+      setPhase("Failed");
+      window.showToast?.("安装已强制终止", "error");
+    } catch (e) {
+      window.showToast?.("终止失败: " + e.message, "error");
+    }
+  };
+
   const phaseColor = {
     Succeeded: "var(--success, #22c55e)",
     Failed:    "var(--danger, #ef4444)",
@@ -180,7 +192,16 @@ function InstallStep({ namespace, name, onDone }) {
           <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>状态:</span>
           <span style={{ fontSize: 13, fontWeight: 600, color: phaseColor }}>{phase}</span>
           {phase === "Running" && (
-            <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>安装中,请勿关闭页面</span>
+            <>
+              <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>安装中,请勿关闭页面</span>
+              <button
+                className="btn btn-danger"
+                style={{ marginLeft: "auto", fontSize: 12 }}
+                onClick={() => setShowAbortConfirm(true)}
+              >
+                强制终止
+              </button>
+            </>
           )}
           {phase === "Succeeded" && (
             <button className="btn btn-primary" style={{ marginLeft: "auto", fontSize: 12 }} onClick={onDone}>
@@ -194,13 +215,25 @@ function InstallStep({ namespace, name, onDone }) {
             background: "#0d1117", color: "#e2e8f0",
             fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6,
             padding: "12px 16px", borderRadius: 8,
-            minHeight: 320, maxHeight: 480, overflowY: "auto",
+            minHeight: 480, maxHeight: 640, overflowY: "auto",
             whiteSpace: "pre-wrap", wordBreak: "break-all",
           }}
         >
           {log || "等待日志输出..."}
         </div>
       </div>
+
+      {/* 强制终止确认弹窗 */}
+      {showAbortConfirm && (
+        <ConfirmDialog
+          title="强制终止安装"
+          description="强制终止将直接终止当前安装流程，终止后需要重新安装部署。确定要终止吗？"
+          confirmText="确认终止"
+          cancelText="取消"
+          onCancel={() => setShowAbortConfirm(false)}
+          onConfirm={handleAbort}
+        />
+      )}
     </section>
   );
 }
@@ -216,7 +249,7 @@ function buildInventory(nodes) {
 
   for (const node of nodes) {
     const connector = {
-      host: node.address,
+      host: node.sshHost || node.address,
       port: String(node.port || 22),
       user: node.user || "root",
     };
@@ -224,10 +257,9 @@ function buildInventory(nodes) {
     if (node.privateKey) connector.private_key_content = node.privateKey;
 
     hosts[node.name] = {
-      internal_ipv4: node.address,
+      internal_ipv4: node.internalIP || node.address,
       connector,
       ...(node.arch       ? { arch: node.arch }             : {}),
-      ...(node.os         ? { os: node.os }                 : {}),
       ...(node.archLocked ? { archLocked: node.archLocked } : {}),
     };
 
@@ -243,7 +275,11 @@ function buildInventory(nodes) {
       hosts,
       groups: {
         kube_control_plane: { hosts: masters },
-        kube_node:          { hosts: workers.length ? workers : masters },
+        kube_worker:        { hosts: workers.length ? workers : masters },
+        etcd:               { hosts: masters },
+        k8s_cluster:        { groups: ["kube_control_plane", "kube_worker"], hosts: [] },
+        nfs:                { hosts: [] },
+        image_registry:     { hosts: [] },
         all:                { hosts: Object.keys(hosts) },
       },
     },
@@ -255,7 +291,7 @@ function inventoryHostsToNodes(items) {
   return items.map((h) => {
     const groups  = (h.groups || []).map((g) => g.role);
     const isMaster = groups.includes("kube_control_plane");
-    const isWorker = groups.includes("kube_node");
+    const isWorker = groups.includes("kube_worker");
     const role = (isMaster && isWorker) ? "both"
                : isMaster               ? "master"
                : isWorker               ? "worker"
@@ -263,6 +299,8 @@ function inventoryHostsToNodes(items) {
     return {
       name:       h.hostname || h.name,
       address:    h.internalIPV4 || h.sshHost || "",
+      sshHost:    h.sshHost || h.internalIPV4 || "",
+      internalIP: h.internalIPV4 || "",
       port:       parseInt(h.sshPort, 10) || 22,
       user:       h.sshUser || "root",
       password:   h.sshPassword || "",
@@ -328,6 +366,7 @@ function App() {
   const [precheckErrors, setPrecheckErrors] = React.useState(null); // { filename: msg }
   const [logModal, setLogModal] = React.useState(null); // { namespace, name, title }
   const clusterSaveRef = React.useRef(null);
+  const clusterValidateRef = React.useRef(null);
   const saveTimerRef   = React.useRef(null);
 
   const titles = ["基本信息", "安装预览", "安装", "安装校验"];
@@ -360,10 +399,18 @@ function App() {
     setInstallError(null);
     setPrecheckErrors(null);
 
-    // step 0→1: 保存集群配置 + 等待 precheck
-    if (step === 0 && clusterSaveRef.current) {
+    // step 0→1: 校验 + 保存集群配置 + 等待 precheck
+    if (step === 0) {
+      const errMsg = clusterValidateRef.current?.();
+      if (errMsg) {
+        window.showToast?.(errMsg, "error");
+        return;
+      }
+      if (!clusterSaveRef.current) return;
       setInstalling(true);
       try {
+        // 确保 Inventory 已存在（precheck playbook 需要引用 inventory）
+        await saveNodesToInventory(nodes);
         await clusterSaveRef.current();
       } catch (e) {
         // 422 precheck 失败: e.data 包含 { filename: failureMessage }
@@ -402,11 +449,31 @@ function App() {
           throw new Error("schema 中未配置 install playbook 路径（install.kubekey.kubesphere.io/schema）");
         }
 
+        // 从 localStorage 读取最新的 schema 配置（含 kube_version 等）
+        let schemaConfig = {};
+        try {
+          const local = localStorage.getItem("kkSchemaConfig");
+          if (local) {
+            const parsed = JSON.parse(local);
+            // 取第一个 schema 的配置（如 kubernetes.json 的内容）
+            const firstKey = Object.keys(parsed)[0];
+            if (firstKey) schemaConfig = parsed[firstKey];
+          }
+        } catch (_) {}
+
         const pb = await window.kkApi.createPlaybook({
           apiVersion: "core.kubekey.kubesphere.io/v1",
           kind: "Playbook",
           metadata: { generateName: "install-", namespace: "default" },
-          spec: { playbook: playbookFile, inventory: "default" },
+          spec: {
+            playbook: playbookFile,
+            inventoryRef: {
+              kind: "Inventory",
+              namespace: "default",
+              name: "default",
+            },
+            config: { spec: schemaConfig },
+          },
         });
 
         setPlaybook({
@@ -478,7 +545,7 @@ function App() {
                   }
                 }}
               />
-              <ClusterForm saveRef={clusterSaveRef} />
+              <ClusterForm saveRef={clusterSaveRef} validateRef={clusterValidateRef} />
 
               {/* Precheck 失败详情 */}
               {precheckErrors && (
@@ -565,12 +632,22 @@ function App() {
 // ============ 最近 Playbook 列表 — 供安装预览页查看日志 ============
 function RecentPlaybooks({ onViewLog }) {
   const [playbooks, setPlaybooks] = React.useState([]);
+  const [inventoryIps, setInventoryIps] = React.useState({}); // hostname → ip
 
   React.useEffect(() => {
     window.kkApi.listPlaybooks({ namespace: "default", limit: 20 })
       .then((data) => {
         const items = Array.isArray(data) ? data : (data.items || []);
         setPlaybooks(items.slice(0, 10));
+      })
+      .catch(() => {});
+    // 加载默认 inventory 的主机 IP 映射，用于 host-check 显示
+    window.kkApi.listInventoryHosts("default", "default")
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data.items || []);
+        const m = {};
+        list.forEach((h) => { m[h.name || h.hostname] = h.internalIPV4 || h.sshHost || ""; });
+        setInventoryIps(m);
       })
       .catch(() => {});
   }, []);
@@ -591,7 +668,7 @@ function RecentPlaybooks({ onViewLog }) {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "var(--bg-hover)", borderBottom: "1px solid var(--border)" }}>
-              {["Playbook", "命名空间", "状态", "操作"].map((h) => (
+              {["Playbook", "命名空间", "状态", "创建时间", "操作"].map((h) => (
                 <th key={h} style={{ padding: "8px 14px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>{h}</th>
               ))}
             </tr>
@@ -601,13 +678,20 @@ function RecentPlaybooks({ onViewLog }) {
               const name = pb.metadata?.name || "";
               const ns   = pb.metadata?.namespace || "default";
               const phase = pb.status?.phase || "Pending";
+              const created = pb.metadata?.creationTimestamp || "";
+              const fmtTime = created ? created.replace("T", " ").split(".")[0] : "";
+              // host-check playbook 名称旁显示节点 IP
+              const isHostCheck = name.startsWith("host-check-");
+              const hostIps = isHostCheck ? Object.values(inventoryIps).filter(Boolean).join(", ") : "";
+              const ipSuffix = isHostCheck && hostIps ? ` (${hostIps})` : "";
               return (
                 <tr key={name} style={{ borderBottom: "1px solid var(--border-light)" }}>
-                  <td style={{ padding: "8px 14px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{name}</td>
+                  <td style={{ padding: "8px 14px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{name}{ipSuffix}</td>
                   <td style={{ padding: "8px 14px" }}>{ns}</td>
                   <td style={{ padding: "8px 14px" }}>
                     <span style={{ color: phaseColor[phase] || "var(--text-secondary)", fontWeight: 500 }}>{phase}</span>
                   </td>
+                  <td style={{ padding: "8px 14px", fontSize: 12, color: "var(--text-tertiary)", whiteSpace: "nowrap" }}>{fmtTime}</td>
                   <td style={{ padding: "8px 14px" }}>
                     <button
                       className="btn btn-ghost"

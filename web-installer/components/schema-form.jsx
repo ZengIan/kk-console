@@ -93,19 +93,40 @@ function SchemaField({ name, schema, values, onChange, required, uiSchema, path 
   }
 
   const inputType = uiProps.type || (schema.type === "integer" ? "number" : "text");
+  const [showPwd, setShowPwd] = React.useState(false);
+
+  const inputEl = inputType === "password" ? (
+    <div className="password-input">
+      <input
+        className="input"
+        type={showPwd ? "text" : "password"}
+        value={value ?? ""}
+        onChange={(e) => set(e.target.value)}
+      />
+      <span className="eye" onClick={() => setShowPwd((s) => !s)}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+        </svg>
+      </span>
+    </div>
+  ) : (
+    <input
+      className="input"
+      type={inputType}
+      value={value ?? ""}
+      min={schema.minimum}
+      max={schema.maximum}
+      onChange={(e) =>
+        set(schema.type === "integer" ? +e.target.value : e.target.value)
+      }
+    />
+  );
+
   return (
     <div className="field">
       <label className={`field-label ${required ? "field-required" : ""}`}>{title}</label>
-      <input
-        className="input"
-        type={inputType}
-        value={value ?? ""}
-        min={schema.minimum}
-        max={schema.maximum}
-        onChange={(e) =>
-          set(schema.type === "integer" ? +e.target.value : e.target.value)
-        }
-      />
+      {inputEl}
       {desc && <div className="field-hint">{desc}</div>}
     </div>
   );

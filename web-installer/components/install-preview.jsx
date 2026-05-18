@@ -9,7 +9,37 @@ function InstallPreview() {
     (async () => {
       const list = await window.loadSchemas();
       let cfg = {};
-      try { cfg = (await window.kkApi.getSchemaConfig()) || {}; } catch (e) { cfg = {}; }
+
+      // 优先从后端加载（config.json 是权威数据源）
+      try {
+        const remote = await window.kkApi.getSchemaConfig();
+        // 判断是否真的返回了 schema 配置数据（必须有 schema 文件名作为 key）
+        if (remote && typeof remote === "object") {
+          const hasSchemaKey = list.some((s) => s.name in remote);
+          if (hasSchemaKey) {
+            cfg = remote;
+            localStorage.setItem("kkSchemaConfig", JSON.stringify(remote));
+          }
+        }
+      } catch (e) {
+        console.warn("[InstallPreview] getSchemaConfig 失败:", e?.message);
+      }
+
+      // 后端没有数据时，从 localStorage 读取
+      if (!Object.keys(cfg).length) {
+        try {
+          const local = localStorage.getItem("kkSchemaConfig");
+          if (local) cfg = JSON.parse(local);
+        } catch (_) {}
+      }
+
+      // 调试：打印实际读取到的配置摘要
+      for (const s of list) {
+        const vals = cfg[s.name];
+        const version = vals ? window.extractVersion(vals, s.dataSchema) : "(no config)";
+        console.log(`[InstallPreview] schema=${s.name}, hasConfig=${!!vals}, version=${version}`);
+      }
+
       setSchemas(list);
       setConfig(cfg);
       setLoading(false);

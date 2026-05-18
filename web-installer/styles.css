@@ -359,6 +359,16 @@ html, body {
   border-color: var(--primary-600);
 }
 
+.btn-danger {
+  background: var(--danger, #ef4444);
+  color: #fff;
+  border-color: var(--danger, #ef4444);
+}
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
 .btn-secondary {
   background: #fff;
   color: var(--primary-600);
@@ -594,7 +604,7 @@ html, body {
 
 .yaml-gutter {
   flex-shrink: 0;
-  padding: 14px 0;
+  padding: 0;
   background: #0a0e15;
   border-right: 1px solid #1e293b;
   user-select: none;
@@ -606,6 +616,9 @@ html, body {
   color: #475569;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .yaml-edit-wrap {
@@ -631,6 +644,7 @@ html, body {
 .yaml-line {
   white-space: pre;
   min-height: 1.7em;
+  line-height: 1.7;
 }
 
 .yaml-textarea {
@@ -849,15 +863,21 @@ html, body {
 }
 
 .host-port .input { flex: 1; }
-.host-port .port-input { width: 90px; flex-shrink: 0; }
+.host-port .port-input { width: 72px; flex-shrink: 0; }
 .host-port .sep { color: var(--text-tertiary); }
 
 /* 密码输入(带眼睛) */
 .password-input {
   position: relative;
+  display: block;
+  width: 100%;
+  max-width: 450px;
 }
 
-.password-input .input { padding-right: 36px; }
+.password-input .input {
+  width: 100%;
+  padding-right: 36px;
+}
 
 .password-input .eye {
   position: absolute;

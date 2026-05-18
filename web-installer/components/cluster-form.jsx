@@ -4,7 +4,7 @@
 //   - 保存时整体 map 提交: { "kubernetes.json": {...}, "camp.json": {...} }
 //   - 新增组件: 后端 schema/ 目录扔一个 .json 即可,前端 0 改动
 
-function ClusterForm({ saveRef }) {
+function ClusterForm({ saveRef, validateRef }) {
   const [schemas, setSchemas] = React.useState([]);     // [{ name, dataSchema, uiSchema }]
   const [activeName, setActiveName] = React.useState(null);
   const [mode, setMode] = React.useState("form");
@@ -19,12 +19,28 @@ function ClusterForm({ saveRef }) {
     (async () => {
       const list = await window.loadSchemas();
 
+      // 优先从 localStorage 读取（刷新后秒级恢复），再从后端加载
       let cfg = {};
       try {
-        cfg = (await window.kkApi.getSchemaConfig()) || {};
-      } catch (e) {
-        cfg = {};
-      }
+        const local = localStorage.getItem("kkSchemaConfig");
+        if (local) cfg = JSON.parse(local);
+      } catch (_) {}
+      // 异步从后端加载（会覆盖 localStorage 中的值）
+      window.kkApi.getSchemaConfig()
+        .then((data) => {
+          if (data && typeof data === "object") {
+            localStorage.setItem("kkSchemaConfig", JSON.stringify(data));
+            setValuesMap((prev) => {
+              const merged = {};
+              for (const s of list) {
+                const saved = data[s.name];
+                merged[s.name] = saved && Object.keys(saved).length ? saved : (prev[s.name] || extractDefaults(s.dataSchema));
+              }
+              return merged;
+            });
+          }
+        })
+        .catch(() => {});
 
       const vMap = {};
       const yMap = {};
@@ -53,10 +69,25 @@ function ClusterForm({ saveRef }) {
     setYamlMap((prev) => ({ ...prev, [activeName]: jsonToYaml(valuesMap[activeName] || {}) }));
   }, [valuesMap, mode, activeName]);
 
-  // 保存: 整体 map 提交到后端
+  // 表单值变化时防抖保存到后端 + localStorage
+  const saveTimerRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!Object.keys(valuesMap).length) return;
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      localStorage.setItem("kkSchemaConfig", JSON.stringify(valuesMap));
+      window.kkApi.saveSchemaConfig(valuesMap).catch((e) => {
+        console.warn("自动保存配置失败:", e.message);
+      });
+    }, 1500);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [valuesMap]);
+
+  // 保存: 整体 map 提交到后端,同时更新 localStorage
   const saveConfig = React.useCallback(async () => {
     if (!Object.keys(valuesMap).length) return;
     setSaveError(null);
+    localStorage.setItem("kkSchemaConfig", JSON.stringify(valuesMap));
     try {
       await window.kkApi.saveSchemaConfig(valuesMap);
     } catch (e) {
@@ -68,7 +99,15 @@ function ClusterForm({ saveRef }) {
 
   React.useEffect(() => {
     if (saveRef) saveRef.current = saveConfig;
-  }, [saveRef, saveConfig]);
+    if (validateRef) validateRef.current = () => {
+      for (const vals of Object.values(valuesMap)) {
+        if (vals?.storage_class?.nfs?.enabled && !vals.storage_class.nfs.server) {
+          return "请填写 NFS 服务器地址";
+        }
+      }
+      return null;
+    };
+  }, [saveRef, validateRef, saveConfig, valuesMap]);
 
   // YAML 直接编辑 → 反向同步当前 tab 的 values
   const onYamlChange = (text) => {

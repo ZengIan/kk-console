@@ -15,6 +15,7 @@
       The etcd inventory group "etcd" must not be empty. Please verify that this group is properly defined in your inventory.
 
 - name: Inventory | Fail if the number of etcd hosts is even
+  when: .groups.etcd | empty | not
   assert:
     that: (mod (.groups.etcd | len) 2) | eq 1
     fail_msg: >-

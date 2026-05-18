@@ -20,5 +20,4 @@
         {{ $k }}:
           arch: "{{ if $.architectures.amd64 | has ($v.os.architecture | default "") }}amd64{{ else if $.architectures.arm64 | has ($v.os.architecture | default "") }}arm64{{ else }}{{ $v.os.architecture | default "" }}{{ end }}"
           hostname: "{{ $v.os.hostname | default "" }}"
-          os: {{ $v.os.release.PRETTY_NAME | default "\"\"" }}
         {{- end }}

@@ -119,8 +119,8 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
           节点扫描
         </button>
         <button
-          className="btn btn-ghost"
-          style={{ fontSize: 13, color: selectedRows.size > 0 ? "var(--danger)" : undefined }}
+          className={`btn ${selectedRows.size > 0 ? "btn-danger" : "btn-ghost"}`}
+          style={{ fontSize: 13 }}
           disabled={selectedRows.size === 0}
           onClick={removeBatch}
         >
@@ -167,7 +167,7 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
                 <th style={{ width: 40, padding: "10px 12px", textAlign: "center" }}>
                   <input type="checkbox" checked={allPageSelected} onChange={toggleAllPage} />
                 </th>
-                {["主机名", "状态", "操作系统", "SSH 端口", "节点 IP 地址", "用户名", "CPU 架构", "角色", "标签", "操作"].map((h) => (
+                {["主机名", "状态", "操作系统", "SSH 端口", "节点 SSH IP 地址", "内网 IP", "用户名", "CPU 架构", "角色", "标签", "操作"].map((h) => (
                   <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -175,7 +175,7 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
             <tbody>
               {pageNodes.length === 0 ? (
                 <tr>
-                  <td colSpan={11} style={{ textAlign: "center", padding: "40px 0", color: "var(--text-tertiary)" }}>
+                  <td colSpan={12} style={{ textAlign: "center", padding: "40px 0", color: "var(--text-tertiary)" }}>
                     未找到匹配节点
                   </td>
                 </tr>
@@ -203,6 +203,7 @@ function NodeSettings({ nodes = [], onNodesChange, onRefresh }) {
                       {node.port || 22}
                     </td>
                     <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: 12, whiteSpace: "nowrap" }}>{node.address || "-"}</td>
+                    <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: 12, whiteSpace: "nowrap", color: node.internalIP ? "var(--text-primary)" : "var(--text-tertiary)" }}>{node.internalIP || "-"}</td>
                     <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>{node.user || "root"}</td>
                     <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>{node.arch || "-"}</td>
                     <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>{roleLabel[node.role] || "-"}</td>

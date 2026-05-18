@@ -129,6 +129,7 @@ const FALLBACK_SCHEMA = {
               server: { type: "string", title: "NFS 服务器地址" },
               path: { type: "string", title: "共享目录", default: "/data/share" },
             },
+            required: ["server"],
           },
         },
       },
@@ -137,9 +138,9 @@ const FALLBACK_SCHEMA = {
   uiSchema: {
     fields: {
       image_registry: {
-        "ui:props": {
+        fields: {
           auth: {
-            "ui:props": {
+            fields: {
               password: { "ui:props": { type: "password" } },
             },
           },

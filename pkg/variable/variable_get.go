@@ -67,7 +67,7 @@ var GetHostnames = func(name []string) GetFunc {
 			// Handle random host selection from group (e.g., "group|random")
 			regexForRandom := regexp.MustCompile(`^(.+?)\s*\|\s*random$`)
 			if match := regexForRandom.FindStringSubmatch(strings.TrimSpace(n)); match != nil {
-				if group, ok := ConvertGroup(vv.value.Inventory)[match[1]]; ok && len(group) > 0 {
+				if group, ok := ConvertGroup(vv.value.Inventory)[match[1]]; ok {
 					hs = append(hs, group[rand.Intn(len(group))])
 				}
 			}

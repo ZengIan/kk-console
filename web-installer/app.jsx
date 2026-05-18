@@ -317,9 +317,16 @@ function inventoryHostsToNodes(items) {
 // 持久化节点到 Inventory(upsert，同时将已删除的 host 显式置 null)
 async function saveNodesToInventory(nodes) {
   const inv = buildInventory(nodes);
+  if (!nodes.length) return;
 
+  // 先尝试创建（POST），如果已存在再走 PATCH 更新
   try {
-    // 先拉当前 Inventory，算出被删除的 host 名，merge patch 需要显式置 null 才能删除
+    await window.kkApi.createInventory(inv);
+  } catch (e) {
+    // 409 Conflict = 已存在，走 PATCH 更新
+    const isConflict = String(e.message).includes("409") || e.message?.toLowerCase().includes("already exists");
+    if (!isConflict) throw e; // 非冲突错误则抛出
+
     let removedHosts = {};
     try {
       const cur = await window.kkApi.getInventory("default", "default");
@@ -328,20 +335,23 @@ async function saveNodesToInventory(nodes) {
       curHostNames.forEach((name) => {
         if (!newHostNames.has(name)) removedHosts[name] = null;
       });
-    } catch (_) { /* 404 时忽略 */ }
+    } catch (_) {}
 
-    const patch = {
-      spec: {
-        ...inv.spec,
-        hosts: { ...inv.spec.hosts, ...removedHosts },
-      },
-    };
-    await window.kkApi.patchInventory("default", "default", patch, { promise: false, type: "merge" });
-  } catch (e) {
-    if (String(e.message).includes("404") || String(e.message).toLowerCase().includes("not found")) {
-      if (nodes.length) await window.kkApi.createInventory(inv);
+    await window.kkApi.patchInventory("default", "default", {
+      spec: { ...inv.spec, hosts: { ...inv.spec.hosts, ...removedHosts } },
+    }, { promise: false, type: "merge" });
+  }
+
+  // 确认 inventory 已写入（最多重试 5 次，间隔 500ms）
+  for (let i = 0; i < 5; i++) {
+    try {
+      await window.kkApi.getInventory("default", "default");
+      return; // 成功获取，确认已就绪
+    } catch (_) {
+      if (i < 4) await new Promise((r) => setTimeout(r, 500));
     }
   }
+  console.warn("saveNodesToInventory: 无法确认 inventory 已创建");
 }
 
 // 启动时从 Inventory 读回节点列表

@@ -317,7 +317,6 @@ function inventoryHostsToNodes(items) {
 // 持久化节点到 Inventory(upsert，同时将已删除的 host 显式置 null)
 async function saveNodesToInventory(nodes) {
   const inv = buildInventory(nodes);
-  if (!nodes.length) return;
 
   // 先尝试创建（POST），如果已存在再走 PATCH 更新
   try {

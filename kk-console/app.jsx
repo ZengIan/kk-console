@@ -567,10 +567,16 @@ function RecentPlaybooks({ onViewLog }) {
   const [playbooks, setPlaybooks] = React.useState([]);
 
   React.useEffect(() => {
-    window.kkApi.listPlaybooks({ namespace: "default", limit: 20 })
+    window.kkApi.listPlaybooks({ namespace: "default", limit: 10, orderBy: "creationTimestamp", ascending: false })
       .then((data) => {
         const items = Array.isArray(data) ? data : (data.items || []);
-        setPlaybooks(items.slice(0, 10));
+        // 按创建时间倒序取最新10条（后端已排序，前端再兜底）
+        const sorted = items.slice().sort((a, b) => {
+          const ta = new Date(a.metadata?.creationTimestamp || 0).getTime();
+          const tb = new Date(b.metadata?.creationTimestamp || 0).getTime();
+          return tb - ta;
+        });
+        setPlaybooks(sorted.slice(0, 10));
       })
       .catch(() => {});
   }, []);
@@ -591,7 +597,7 @@ function RecentPlaybooks({ onViewLog }) {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "var(--bg-hover)", borderBottom: "1px solid var(--border)" }}>
-              {["Playbook", "命名空间", "状态", "操作"].map((h) => (
+              {["Playbook", "命名空间", "状态", "创建时间", "操作"].map((h) => (
                 <th key={h} style={{ padding: "8px 14px", textAlign: "left", fontWeight: 500, color: "var(--text-secondary)" }}>{h}</th>
               ))}
             </tr>
@@ -601,6 +607,9 @@ function RecentPlaybooks({ onViewLog }) {
               const name = pb.metadata?.name || "";
               const ns   = pb.metadata?.namespace || "default";
               const phase = pb.status?.phase || "Pending";
+              const ts = pb.metadata?.creationTimestamp
+                ? new Date(pb.metadata.creationTimestamp).toLocaleString("zh-CN", { hour12: false })
+                : "-";
               return (
                 <tr key={name} style={{ borderBottom: "1px solid var(--border-light)" }}>
                   <td style={{ padding: "8px 14px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{name}</td>
@@ -608,6 +617,7 @@ function RecentPlaybooks({ onViewLog }) {
                   <td style={{ padding: "8px 14px" }}>
                     <span style={{ color: phaseColor[phase] || "var(--text-secondary)", fontWeight: 500 }}>{phase}</span>
                   </td>
+                  <td style={{ padding: "8px 14px", fontSize: 12, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>{ts}</td>
                   <td style={{ padding: "8px 14px" }}>
                     <button
                       className="btn btn-ghost"

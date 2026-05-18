@@ -42,7 +42,10 @@ func NewPlaybookExecutor(ctx context.Context, client ctrlclient.Client, playbook
 	// get variable
 	v, err := variable.New(ctx, client, *playbook, source.FileSource)
 	if err != nil {
-		klog.V(5).ErrorS(err, "get variable error", "playbook", ctrlclient.ObjectKeyFromObject(playbook))
+		klog.ErrorS(err, "failed to initialize variable for playbook", "playbook", ctrlclient.ObjectKeyFromObject(playbook))
+		if logOutput != nil {
+			fmt.Fprintf(logOutput, "ERROR: failed to initialize variable: %v\n", err)
+		}
 
 		return nil
 	}

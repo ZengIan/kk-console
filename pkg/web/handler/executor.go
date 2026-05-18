@@ -63,7 +63,10 @@ func (m *manager) executor(playbook *kkcorev1.Playbook, client ctrlclient.Client
 		// Register the playbook and its cancel function in the playbookManager
 		m.addPlaybook(playbook, cancel)
 		// Execute the playbook and write output to the log file
-		if err := executor.NewPlaybookExecutor(ctx, client, playbook, file).Exec(ctx); err != nil {
+		exec := executor.NewPlaybookExecutor(ctx, client, playbook, file)
+		if exec == nil {
+			fmt.Fprintf(file, "%s [Playbook %s] ERROR: failed to create playbook executor (see server log for details)\n", time.Now().Format(time.TimeOnly+" MST"), ctrlclient.ObjectKeyFromObject(playbook))
+		} else if err := exec.Exec(ctx); err != nil {
 			// recode to log file
 			fmt.Fprintf(file, "%s [Playbook %s] ERROR: %v\n", time.Now().Format(time.TimeOnly+" MST"), ctrlclient.ObjectKeyFromObject(playbook), err)
 		}

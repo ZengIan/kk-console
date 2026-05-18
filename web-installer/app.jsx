@@ -635,16 +635,31 @@ function RecentPlaybooks({ onViewLog }) {
   const [inventoryIps, setInventoryIps] = React.useState({}); // hostname → ip
 
   React.useEffect(() => {
-    window.kkApi.listPlaybooks({ namespace: "default", limit: 10, orderBy: "creationTimestamp", ascending: false })
+    window.kkApi.listPlaybooks({ namespace: "default", limit: 200, orderBy: "creationTimestamp", ascending: false })
       .then((data) => {
         const items = Array.isArray(data) ? data : (data.items || []);
-        // 按创建时间倒序取最新10条（后端已排序，前端再兜底）
+        // 按创建时间倒序排列
         const sorted = items.slice().sort((a, b) => {
           const ta = new Date(a.metadata?.creationTimestamp || 0).getTime();
           const tb = new Date(b.metadata?.creationTimestamp || 0).getTime();
           return tb - ta;
         });
-        setPlaybooks(sorted.slice(0, 10));
+        // 按 playbook 类型去重：去掉末尾 kubernetes generate-name 随机后缀（4-6位字母数字）
+        const getType = (name) => {
+          const m = name.match(/^(.+)-([a-z0-9]{4,6})$/);
+          return m ? m[1] : name;
+        };
+        const seen = new Set();
+        const deduped = [];
+        for (const pb of sorted) {
+          const type = getType(pb.metadata?.name || "");
+          if (!seen.has(type)) {
+            seen.add(type);
+            deduped.push(pb);
+            if (deduped.length >= 10) break;
+          }
+        }
+        setPlaybooks(deduped);
       })
       .catch(() => {});
     // 加载默认 inventory 的主机 IP 映射，用于 host-check 显示

@@ -1,1 +1,0 @@
-const d={"dual.mode.editor.form.title":"表单模式","dual.mode.editor.yaml.edit":"编辑 YAML","dual.mode.editor.yaml.title":"YAML 模式","dual.mode.editor.yaml.validate.error":"YAML 格式错误，无法切换到表单模式。请先修复 YAML 格式错误。","dual.mode.editor.yaml.validate.title":"提示"};export{d as default};

@@ -1,1 +1,0 @@
-const t="Network error",e="Request timeout",o={"app.actions.retry":"Retry","app.title":"Something went wrong",networkError:t,"notFound.actions.back":"Back to Home","notFound.title":"404 - Not Found",requestTimeout:e,"route.title":"An unexpected error occurred"};export{o as default,t as networkError,e as requestTimeout};

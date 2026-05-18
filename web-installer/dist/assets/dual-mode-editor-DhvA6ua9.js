@@ -1,1 +1,0 @@
-const d={"dual.mode.editor.form.title":"Form Mode","dual.mode.editor.yaml.edit":"Edit YAML","dual.mode.editor.yaml.title":"YAML Mode","dual.mode.editor.yaml.validate.error":"Invalid YAML format, cannot switch to form mode. Please fix the YAML format error first.","dual.mode.editor.yaml.validate.title":"Tip"};export{d as default};

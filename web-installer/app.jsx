@@ -267,20 +267,6 @@ function buildInventory(nodes) {
     if (node.role === "worker" || node.role === "both") workers.push(node.name);
   }
 
-  // 检查是否有节点本身就是本机（SSH 地址为 localhost/127.0.0.1）
-  const hasLocalNode = nodes.some((n) => {
-    const host = (n.sshHost || n.address || "").toLowerCase();
-    return host === "localhost" || host === "127.0.0.1" || host === "127.0.1.1";
-  });
-
-  // 添加 localhost 用于本地任务（certs/init、download 等），无 connector 使用本地执行器
-  hosts.localhost = { internal_ipv4: "127.0.0.1" };
-  // 如果本机也是 K8s 节点，则加入对应组
-  if (hasLocalNode) {
-    masters.push("localhost");
-    workers.push("localhost");
-  }
-
   return {
     apiVersion: "core.kubekey.kubesphere.io/v1",
     kind: "Inventory",

@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/network
+  creationTimestamp: "2026-05-17T20:14:42Z"
+  generateName: precheck-kubernetes-kz8kw-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:14:42Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:14:42Z"
+  name: precheck-kubernetes-kz8kw-5gxpm
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-kz8kw
+    uid: 2cfaa148-52d6-41cd-a507-3de41aeaa207
+  resourceVersion: "3"
+  uid: ea041382-4986-4a2b-b8d5-5a57a0548984
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: '"cni.service_cidr" must specify both IPv4 and IPv6 ranges, using
+        either the format ipv4_cidr/ipv6_cidr or ipv4_cidr,ipv6_cidr.'
+      that: .cni.service_cidr | splitList "," | len | ge 2
+    name: assert
+  name: Network | Check service CIDR includes both IPv4 and IPv6
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+  - '{{ .cni.service_cidr | empty | not }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

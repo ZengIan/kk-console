@@ -1,0 +1,80 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/network
+  creationTimestamp: "2026-05-17T19:34:02Z"
+  generateName: precheck-kubernetes-ssvjq-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:34:02Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:34:08Z"
+  name: precheck-kubernetes-ssvjq-8pv5p
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-ssvjq
+    uid: ac4a79c4-a5f9-4aa1-9c56-be63a0e1d425
+  resourceVersion: "3"
+  uid: 187d2436-00a2-4fb6-9f18-dff22edc0c2c
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      {{- if .internal_ipv4 | empty | not }}
+      if ! ip -o addr show | grep -q {{ .internal_ipv4 }}; then
+        echo 'The specified IPv4 address is not assigned to any network interface.' >&2
+        exit 1
+      fi
+      {{- end }}
+      {{- if .internal_ipv6 | empty | not }}
+      if ! ip -o addr show | grep -q {{ .internal_ipv6 }}; then
+        echo 'The specified IPv6 address is not assigned to any network interface.' >&2
+        exit 1
+      fi
+      {{- end }}
+    name: command
+  name: Network | Ensure required network interfaces are present
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+status:
+  hostResults:
+  - error: module run failed
+    host: 47-253-179-114
+    loopResults:
+    - error: Process exited with status 1
+      item: null
+      stdout: The specified IPv4 address is not assigned to any network interface.
+  phase: Failed

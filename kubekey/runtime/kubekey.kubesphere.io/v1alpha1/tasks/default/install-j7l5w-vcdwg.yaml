@@ -1,0 +1,81 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/dns
+  creationTimestamp: "2026-05-17T20:23:10Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:loop: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:23:10Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:23:14Z"
+  name: install-j7l5w-vcdwg
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: 038c9e06-4ce6-4d99-af7e-c5ad8388fb0f
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: '{{ .native.localDNS | toJson }}'
+  module:
+    args: |
+      # Remove any previous Kubekey-managed kubernetes control plane endpoint DNS entries
+      sed -i '/# kubekey kubernetes control_plane_endpoint BEGIN/,/# kubekey kubernetes control_plane_endpoint END/d' {{ .item }}
+      # Write the current control plane endpoint DNS configuration
+      cat >> {{ .item }} <<EOF
+      # kubekey kubernetes control_plane_endpoint BEGIN
+      {{- if .kubernetes.control_plane_endpoint.type | eq "kube_vip" }}
+      {{ .kubernetes.control_plane_endpoint.kube_vip.address }} {{ .kubernetes.control_plane_endpoint.host }}
+      {{- else if and (.kubernetes.control_plane_endpoint.type | eq "local") (.kubernetes.control_plane_endpoint.local.address | empty | not) }}
+      {{ .kubernetes.control_plane_endpoint.local.address }} {{ .kubernetes.control_plane_endpoint.host }}
+      {{- else }}
+      127.0.0.1 {{ .kubernetes.control_plane_endpoint.host }}
+      ::1 {{ .kubernetes.control_plane_endpoint.host }}
+      {{- end }}
+      # kubekey kubernetes control_plane_endpoint END
+      EOF
+    name: command
+  name: DNS | Set local DNS for kubernetes control plane endpoint
+  when:
+  - '{{.groups.k8s_cluster | default list | has .inventory_hostname}}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: /etc/hosts
+  phase: Success

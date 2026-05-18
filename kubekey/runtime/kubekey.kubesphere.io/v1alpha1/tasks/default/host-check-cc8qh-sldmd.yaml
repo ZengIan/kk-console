@@ -1,0 +1,65 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: .
+  creationTimestamp: "2026-05-17T18:38:09Z"
+  generateName: host-check-cc8qh-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:38:09Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:38:28Z"
+  name: host-check-cc8qh-sldmd
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: host-check-cc8qh
+    uid: dcef1d06-a04b-4dbc-add1-1674fe72e997
+  resourceVersion: "3"
+  uid: c9fbccd0-871e-4926-b0af-36faf6a83aac
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: {}
+    name: setup
+  name: get host info
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

@@ -1,0 +1,80 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/cni
+  creationTimestamp: "2026-05-17T18:10:28Z"
+  generateName: install-pdg24-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:10:28Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:10:28Z"
+  name: install-pdg24-t6kww
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-pdg24
+    uid: 059d5cb2-ba8b-4d75-bc6d-970534ef18f3
+  resourceVersion: "3"
+  uid: 1e887f11-f4d9-4410-96a6-2878f6db4ae3
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args:
+      fail_msg: 'The selected Calico version ({{ .cni.calico_version }}) is not allowed
+        for the selected Kubernetes version ({{ .kubernetes.kube_version }}). '
+      that: index .cluster_require.calico_allowed_versions (slice (.cni.calico_version
+        | splitList ".") 0 2 | join ".") | has (slice (.kubernetes.kube_version |
+        splitList ".") 0 2 | join ".")
+    name: assert
+  name: CNI | Validate calico version is allowed for the selected Kubernetes version
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .cni.type | eq "calico" }}'
+status:
+  hostResults:
+  - error: module run failed
+    host: localhost
+    loopResults:
+    - error: 'failed to execute template ''{{index .cluster_require.calico_allowed_versions
+        (slice (.cni.calico_version | splitList ".") 0 2 | join ".") | has (slice
+        (.kubernetes.kube_version | splitList ".") 0 2 | join ".")}}'': template:
+        kubekey:1:89: executing "kubekey" at <".">: invalid value; expected string'
+      item: null
+      stdErr: failed to parse argument of that
+      stdout: failed
+  phase: Failed

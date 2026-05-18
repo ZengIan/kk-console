@@ -1,0 +1,67 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T20:01:11Z"
+  generateName: install-4s8v4-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:dest: {}
+            f:src: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:01:11Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:01:16Z"
+  name: install-4s8v4-hh4w2
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-4s8v4
+    uid: a4c16473-6e72-4f19-b0b1-083ac3106725
+  resourceVersion: "3"
+  uid: ac2c7151-e90a-495d-8582-3f6979199e0c
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      dest: '{{ .binary_dir }}/manifests.yaml'
+      src: manifests.yaml
+    name: template
+  name: Defaults | Load default templates download
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

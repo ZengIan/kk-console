@@ -1,0 +1,85 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/image-registry/network
+  creationTimestamp: "2026-05-17T20:12:06Z"
+  generateName: precheck-kubernetes-6kt77-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:cri:
+              .: {}
+              f:cert:
+                .: {}
+                f:check:
+                  .: {}
+                  f:cmd: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:12:06Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:12:06Z"
+  name: precheck-kubernetes-6kt77-xttw7
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-6kt77
+    uid: db636db9-195b-48ff-886d-bd20f7af0dc1
+  resourceVersion: "3"
+  uid: cfed0b31-3ba5-4bc0-bd9d-5f90b8510b2c
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      cri:
+        cert:
+          check:
+            cmd: "/etc/kubekey/scripts/check.sh {{ .image_registry.auth.registry |
+              splitList \"/\" | first }} \n    {{- if .image_registry.auth.skip_tls_verify
+              -}}\n    {{ printf \" --insecure  \" }} \n    {{- end -}}\n    {{- if
+              .image_registry.auth.ca_file | empty | not -}}\n    {{ printf \" --ca-file
+              %s \" .image_registry.auth.ca_file }}\n    {{- end -}}\n    {{- if .image_registry.auth.cert_file
+              | empty | not -}}\n    {{ printf \" --cert-file %s \" .image_registry.auth.cert_file
+              }}\n    {{- end -}}\n    {{- if .image_registry.auth.key_file | empty
+              | not -}}\n    {{ printf \" --key-file %s \" .image_registry.auth.key_file
+              }}\n    {{- end -}}"
+    name: set_fact
+  name: Cert | Set cert check command
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

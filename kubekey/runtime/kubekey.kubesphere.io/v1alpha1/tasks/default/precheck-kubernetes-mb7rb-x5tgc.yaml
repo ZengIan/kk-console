@@ -1,0 +1,66 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:36:43Z"
+  generateName: precheck-kubernetes-mb7rb-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:36:43Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:36:48Z"
+  name: precheck-kubernetes-mb7rb-x5tgc
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-mb7rb
+    uid: a01842cc-563f-4941-934e-1cc35a24504b
+  resourceVersion: "3"
+  uid: fd0c092c-042a-4286-b1a5-21dafd121737
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      if [ -d {{ .tmp_dir }} ]; then
+        rm -rf {{ .tmp_dir }}
+      fi
+      mkdir -m 777 -p {{ .tmp_dir }}
+    name: command
+  name: Defaults | Reset temporary directory
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+  phase: Success

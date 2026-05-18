@@ -1,0 +1,70 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/os
+  creationTimestamp: "2026-05-17T20:14:21Z"
+  generateName: install-dzxqf-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:14:21Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:14:21Z"
+  name: install-dzxqf-hfrq6
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-dzxqf
+    uid: 6a2be465-0ba6-4e6a-ab84-ba95c503a3dd
+  resourceVersion: "3"
+  uid: aa6edfc4-eb6c-42ac-acc0-7816d10d36ed
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: The system architecture "{{ .os.architecture }}" is not supported.
+      that: .cluster_require.supported_architectures | has .os.architecture
+    name: assert
+  name: OS | Fail if architecture is not supported
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

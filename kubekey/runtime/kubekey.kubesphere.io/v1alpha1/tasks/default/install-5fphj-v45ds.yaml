@@ -1,0 +1,74 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/image-registry/network
+  creationTimestamp: "2026-05-17T18:45:58Z"
+  generateName: install-5fphj-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:45:58Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:45:58Z"
+  name: install-5fphj-v45ds
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-5fphj
+    uid: 4e16abf2-f444-4269-98af-01f44101da08
+  resourceVersion: "3"
+  uid: 9a64522d-a9d8-4d5d-9c77-52cd2f82076e
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args: |
+      if /etc/kubekey/scripts/check.sh {{ .image_registry.auth.registry | splitList "/" | first }} --ca-file {{ .binary_dir }}/pki/root.crt --cert-file {{ .binary_dir }}/pki/image_registry.crt --key-file {{ .binary_dir }}/pki/image_registry.key ; then
+          echo "true"
+      else
+          echo "false"
+      fi
+    name: command
+  name: Cert | Exec check shell with local certs
+  register: cert_check_self_cert_result
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .cert_check_input_cert_result.stdout | eq "false" }}'
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

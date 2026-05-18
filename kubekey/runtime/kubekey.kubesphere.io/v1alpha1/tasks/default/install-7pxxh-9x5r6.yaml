@@ -1,0 +1,75 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/inventory
+  creationTimestamp: "2026-05-17T18:02:53Z"
+  generateName: install-7pxxh-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:02:53Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:02:53Z"
+  name: install-7pxxh-9x5r6
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-7pxxh
+    uid: bb1bacb2-655a-4dd4-a90a-0b03ed4b7a71
+  resourceVersion: "3"
+  uid: 52243584-005f-4eb0-9ed6-b940944f8c43
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args:
+      fail_msg: The Kubernetes inventory groups "k8s_cluster" and "kube_control_plane"
+        must not be empty. Please ensure both groups are present and correctly specified
+        in your inventory file.
+      that:
+      - .groups.k8s_cluster | empty | not
+      - .groups.kube_control_plane | empty | not
+    name: assert
+  name: Inventory | Kubernetes groups must not be empty
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .kubernetes.kube_version | empty | not }}'
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

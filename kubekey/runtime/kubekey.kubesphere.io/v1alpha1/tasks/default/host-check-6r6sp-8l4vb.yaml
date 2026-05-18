@@ -1,0 +1,65 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: .
+  creationTimestamp: "2026-05-17T17:15:43Z"
+  generateName: host-check-6r6sp-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T17:15:43Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T17:16:20Z"
+  name: host-check-6r6sp-8l4vb
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: host-check-6r6sp
+    uid: 5b5a4477-2ac9-4862-af0c-692e3ae8c845
+  resourceVersion: "3"
+  uid: 0b098c7f-0aa8-4959-9a82-82b21f5e7137
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: {}
+    name: setup
+  name: get host info
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

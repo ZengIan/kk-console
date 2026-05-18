@@ -1,0 +1,54 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  creationTimestamp: "2026-05-17T16:51:04Z"
+  generateName: precheck-kubernetes-krz8j-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T16:51:04Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T16:51:04Z"
+  name: precheck-kubernetes-krz8j-hzcjc
+  namespace: default
+  resourceVersion: "3"
+  uid: 6e2a0a1d-9ee8-432b-b4b8-3cf68d1aa5bd
+spec:
+  DelegateTo: ""
+  hosts:
+  - 172-19-45-156
+  loop: null
+  module:
+    args: null
+    name: setup
+  name: gather_facts
+status:
+  hostResults:
+  - error: module run failed
+    host: 172-19-45-156
+    loopResults:
+    - error: 'failed to get kernel: exit status 1, stderr: "[sudo] password for zengcx:
+        \nsudo: no password was provided\nsudo: a password is required\n": exit status
+        1'
+      item: null
+      stdErr: failed to get host info
+      stdout: failed
+  phase: Failed

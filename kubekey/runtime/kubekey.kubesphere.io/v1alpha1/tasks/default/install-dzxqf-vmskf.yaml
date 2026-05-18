@@ -1,0 +1,94 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/repository
+  creationTimestamp: "2026-05-17T20:15:03Z"
+  generateName: install-dzxqf-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:15:03Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:15:04Z"
+  name: install-dzxqf-vmskf
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-dzxqf
+    uid: 6a2be465-0ba6-4e6a-ab84-ba95c503a3dd
+  resourceVersion: "3"
+  uid: 768daa6c-8645-41b7-9f3d-353d5bb4c5ac
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: "BACKUP_FILE=\"/etc/yum.repos.d.kubekey.bak-$(date +%Y%m%d%H%M%S)\"\nPKGS=\"socat
+      conntrack ipset ebtables chrony ipvsadm{{ if .groups.nfs | default list | has
+      .inventory_hostname }} nfs-kernel-server{{ end }}\"\nPKGS_TO_INSTALL=\"\"\nfor
+      pkg in $PKGS; do\n  if [ -n \"$pkg\" ]; then\n    case \"$pkg\" in\n      socat)\n
+      \       command -v socat >/dev/null 2>&1 || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL
+      socat\"\n        ;;\n      conntrack)\n        command -v conntrack >/dev/null
+      2>&1 || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL conntrack\"\n        ;;\n      ipset)\n
+      \       ipset list >/dev/null 2>&1 || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL ipset\"\n
+      \       ;;\n      ebtables)\n        ebtables -L >/dev/null 2>&1 || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL
+      ebtables\"\n        ;;\n      chrony)\n        [ \"$(systemctl show -p LoadState
+      --value chronyd.service 2>/dev/null)\" = \"loaded\" ] \\\n          || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL
+      chrony\"\n        ;;\n      ipvsadm)\n        ipvsadm -Ln >/dev/null 2>&1 ||
+      PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL ipvsadm\"\n        ;;\n      nfs-kernel-server)\n
+      \       [ \"$(systemctl show -p LoadState --value nfs-server.service 2>/dev/null)\"
+      = \"loaded\" ] \\\n          || PKGS_TO_INSTALL=\"$PKGS_TO_INSTALL nfs-kernel-server\"\n
+      \       ;;\n    esac      \n  fi\ndone\nif [ -f \"{{ .tmp_dir }}/iso\" ]; then\n
+      \ # Backup current YUM repositories\n  mv /etc/yum.repos.d \"$BACKUP_FILE\"\n
+      \ mkdir -p /etc/yum.repos.d\n  # Configure local repository\n  rm -rf /etc/yum.repos.d/*\n
+      \ cat <<EOF > /etc/yum.repos.d/CentOS-local.repo\n[base-local]\nname=Local RPM
+      Repository\nbaseurl=file://{{ .tmp_dir }}/iso\nenabled=1\ngpgcheck=0\nEOF\n
+      \ # Refresh repository cache\n  yum clean all && yum makecache\n  # Install
+      missing packages\n  if [ -n \"$PKGS_TO_INSTALL\" ]; then\n    yum install -y
+      $PKGS_TO_INSTALL\n  fi\n  # Restore original YUM repositories\n  rm -rf /etc/yum.repos.d\n
+      \ mv \"$BACKUP_FILE\" /etc/yum.repos.d\nelse\n  # No local ISO found, using
+      default repositories\n  if [ -n \"$PKGS_TO_INSTALL\" ]; then\n    yum install
+      -y $PKGS_TO_INSTALL\n  fi\nfi\n"
+    name: command
+  name: Repository | Initialize RHEL-based repository and install required system
+    packages
+  when:
+  - '{{or (.groups.k8s_cluster | default list | has .inventory_hostname) (.groups.image_registry
+    | default list | has .inventory_hostname)}}'
+  - '{{ .current_host_type | trim | eq "centos" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

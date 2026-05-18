@@ -1,0 +1,68 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:41:29Z"
+  generateName: precheck-kubernetes-w62fx-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:41:29Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:41:34Z"
+  name: precheck-kubernetes-w62fx-l9mvx
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-w62fx
+    uid: d2ce7bae-0829-4c51-ade4-10e84f0edba3
+  resourceVersion: "3"
+  uid: 621b728b-d496-4749-9bc5-79a6a3f7f1df
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: systemctl show kubelet.service -p LoadState --value
+    name: command
+  name: Defaults | Get kubelet.service LoadState
+  register: kubernetes_install_LoadState
+  when:
+  - '{{ .groups.k8s_cluster | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: not-found
+  phase: Success

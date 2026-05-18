@@ -1,0 +1,49 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  creationTimestamp: "2026-05-17T19:36:22Z"
+  generateName: precheck-kubernetes-rcddh-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:36:22Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:36:38Z"
+  name: precheck-kubernetes-rcddh-tvr5b
+  namespace: default
+  resourceVersion: "3"
+  uid: decfc4ee-f394-4f23-90ee-00f548958034
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: null
+    name: setup
+  name: gather_facts
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

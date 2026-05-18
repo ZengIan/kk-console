@@ -1,0 +1,74 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/cri
+  creationTimestamp: "2026-05-17T18:45:59Z"
+  generateName: install-5fphj-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:45:59Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:45:59Z"
+  name: install-5fphj-bspcs
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-5fphj
+    uid: 4e16abf2-f444-4269-98af-01f44101da08
+  resourceVersion: "3"
+  uid: 139f6d27-8813-4658-a367-e5ab99d1d8e7
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args:
+      fail_msg: 'The detected containerd version ({{ .containerd_version }}) is below
+        the minimum required version: {{ .cluster_require.containerd_min_version_required
+        }}.'
+      that: .cri.containerd_version | semverCompare (printf ">=%s" .cluster_require.containerd_min_version_required)
+    name: assert
+  name: CRI | Validate minimum required containerd version
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{.cri.containerd_version | empty | not}}'
+  - '{{.cri.container_manager | eq "containerd"}}'
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

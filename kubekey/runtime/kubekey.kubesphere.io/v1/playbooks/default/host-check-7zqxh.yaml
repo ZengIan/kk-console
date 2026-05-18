@@ -1,0 +1,64 @@
+apiVersion: kubekey.kubesphere.io/v1
+kind: Playbook
+metadata:
+  creationTimestamp: "2026-05-17T20:12:22Z"
+  generateName: host-check-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+      f:spec:
+        f:config:
+          f:spec:
+            f:work_dir: {}
+        f:inventoryRef:
+          .: {}
+          f:kind: {}
+          f:name: {}
+          f:namespace: {}
+        f:playbook: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:12:22Z"
+  - apiVersion: kubekey.kubesphere.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:phase: {}
+        f:result:
+          f:47-253-179-114:
+            .: {}
+            f:arch: {}
+            f:hostname: {}
+        f:statistics:
+          f:success: {}
+          f:total: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:12:35Z"
+  name: host-check-7zqxh
+  namespace: default
+  resourceVersion: "2"
+  uid: 39bf867e-8017-41e1-aa37-adc2670b7b3c
+spec:
+  config:
+    spec:
+      work_dir: /mnt/e/Openclaw/kk-console/kubekey
+  inventoryRef:
+    kind: Inventory
+    name: default
+    namespace: default
+  playbook: web-installer/host_check.yaml
+  project: {}
+status:
+  phase: Succeeded
+  result:
+    47-253-179-114:
+      arch: amd64
+      hostname: iZ0xi5i49fvgbbl16wsaxrZ
+  statistics:
+    success: 2
+    total: 2

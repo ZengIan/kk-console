@@ -1,0 +1,61 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:36:48Z"
+  generateName: precheck-kubernetes-mb7rb-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:dest: {}
+            f:src: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:36:48Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:36:48Z"
+  name: precheck-kubernetes-mb7rb-r7mtk
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-mb7rb
+    uid: a01842cc-563f-4941-934e-1cc35a24504b
+  resourceVersion: "2"
+  uid: af25f191-2837-4e6f-a392-42c2722dbb33
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      dest: '{{ .binary_dir }}/manifests.yaml'
+      src: manifests.yaml
+    name: template
+  name: Defaults | Load default templates download
+status:
+  phase: Running

@@ -302,7 +302,7 @@ function buildInventory(nodes) {
 
 // 从后端 InventoryHostTable 列表恢复 UI nodes
 function inventoryHostsToNodes(items) {
-  return items.map((h) => {
+  return items.filter((h) => (h.hostname || h.name) !== "localhost").map((h) => {
     const groups  = (h.groups || []).map((g) => g.role);
     const isMaster = groups.includes("kube_control_plane");
     const isWorker = groups.includes("kube_worker");

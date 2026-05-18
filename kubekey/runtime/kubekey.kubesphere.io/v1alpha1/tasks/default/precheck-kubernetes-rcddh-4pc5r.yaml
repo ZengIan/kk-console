@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/os
+  creationTimestamp: "2026-05-17T19:37:24Z"
+  generateName: precheck-kubernetes-rcddh-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:37:24Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:37:24Z"
+  name: precheck-kubernetes-rcddh-4pc5r
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-rcddh
+    uid: 6e2c3d4b-d1de-4e28-8aa9-8dd79becb9a3
+  resourceVersion: "3"
+  uid: 641013a4-503b-43e2-a342-940725e7eb15
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: 'The kernel version "{{ .os.kernel_version }}" is too old. Minimum
+        required version: {{ .cluster_require.min_kernel_version }}.'
+      that: .os.kernel_version | splitList "-" | first | semverCompare (printf ">=%s"
+        .cluster_require.min_kernel_version)
+    name: assert
+  name: OS | Fail if kernel version is too old
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

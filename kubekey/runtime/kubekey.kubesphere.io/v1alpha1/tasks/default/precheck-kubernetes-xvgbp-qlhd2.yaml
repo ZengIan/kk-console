@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:59:32Z"
+  generateName: precheck-kubernetes-xvgbp-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:59:32Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:59:38Z"
+  name: precheck-kubernetes-xvgbp-qlhd2
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-xvgbp
+    uid: 8e47e037-fab5-4d53-abaf-a2610fb976de
+  resourceVersion: "3"
+  uid: 3125da84-0127-4b6e-8cd8-ad52be01d6ca
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: kubelet --version
+    name: command
+  name: Defaults | Get installed Kubernetes version
+  register: kubernetes_install_version
+  when:
+  - '{{ .groups.k8s_cluster | has .inventory_hostname }}'
+status:
+  hostResults:
+  - error: module run failed
+    host: 47-253-179-114
+    loopResults:
+    - error: Process exited with status 127
+      item: null
+      stdout: '/bin/bash: line 1: kubelet: command not found'
+  phase: Ignored

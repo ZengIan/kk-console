@@ -1,0 +1,68 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:33:47Z"
+  generateName: precheck-kubernetes-ssvjq-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:33:47Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:33:53Z"
+  name: precheck-kubernetes-ssvjq-x7mmb
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-ssvjq
+    uid: ac4a79c4-a5f9-4aa1-9c56-be63a0e1d425
+  resourceVersion: "3"
+  uid: b13f79e5-7a9e-4dae-8f59-086f77991eb1
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: systemctl show etcd.service -p ActiveState --value
+    name: command
+  name: Defaults | Get etcd.service ActiveState and save to variable
+  register: etcd_install_ActiveState
+  when:
+  - '{{ .groups.etcd | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: inactive
+  phase: Success

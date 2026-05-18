@@ -1,0 +1,71 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/nfs
+  creationTimestamp: "2026-05-17T20:21:50Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:21:50Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:21:51Z"
+  name: install-j7l5w-dls9z
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: 543dd9d9-b79d-410a-af1c-e87a3d61fd90
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: Exactly one NFS server must be specified. Multiple NFS servers are
+        not supported.
+      that: .groups.nfs | default list | len | eq 1
+    name: assert
+  name: NFS | Fail if more than one NFS server is defined
+  when:
+  - '{{ .groups.nfs | default list | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

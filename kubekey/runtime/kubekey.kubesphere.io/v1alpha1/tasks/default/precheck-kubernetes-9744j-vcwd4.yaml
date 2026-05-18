@@ -1,0 +1,84 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/image-registry/network
+  creationTimestamp: "2026-05-17T19:36:43Z"
+  generateName: precheck-kubernetes-9744j-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:hosts: {}
+            f:vars:
+              .: {}
+              f:image_registry:
+                .: {}
+                f:auth:
+                  .: {}
+                  f:ca_file: {}
+                  f:cert_file: {}
+                  f:key_file: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:36:43Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:36:43Z"
+  name: precheck-kubernetes-9744j-vcwd4
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-9744j
+    uid: 972ba954-5048-4cd6-ad5a-44e09d4336b1
+  resourceVersion: "3"
+  uid: a2b45b35-c875-4b0e-8648-5d525b0ba39a
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      hosts: all
+      vars:
+        image_registry:
+          auth:
+            ca_file: '{{ .binary_dir }}/pki/root.crt'
+            cert_file: '{{ .binary_dir }}/pki/image_registry.crt'
+            key_file: '{{ .binary_dir }}/pki/image_registry.key'
+    name: add_hostvars
+  name: Cert | Set auth ca
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .cert_check_self_cert_result.stdout | eq "true" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

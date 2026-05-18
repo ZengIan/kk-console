@@ -1,0 +1,70 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: .
+  creationTimestamp: "2026-05-17T16:57:47Z"
+  generateName: host-check-zf25g-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T16:57:47Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T16:57:47Z"
+  name: host-check-zf25g-zjsdg
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: host-check-zf25g
+    uid: 12ebfdbe-6c00-4ec4-8093-e1b860925ef4
+  resourceVersion: "3"
+  uid: 2891f494-943e-4c80-b6dd-520181be2df0
+spec:
+  DelegateTo: ""
+  hosts:
+  - 172-19-45-156
+  ignoreError: true
+  loop: null
+  module:
+    args: {}
+    name: setup
+  name: get host info
+status:
+  hostResults:
+  - error: module run failed
+    host: 172-19-45-156
+    loopResults:
+    - error: 'failed to get kernel: exit status 1, stderr: "[sudo] password for zengcx:
+        \nsudo: no password was provided\nsudo: a password is required\n": exit status
+        1'
+      item: null
+      stdErr: failed to get host info
+      stdout: failed
+  phase: Ignored

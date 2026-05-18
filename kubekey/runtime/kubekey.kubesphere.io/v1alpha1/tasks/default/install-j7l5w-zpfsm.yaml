@@ -1,0 +1,73 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/inventory
+  creationTimestamp: "2026-05-17T20:21:36Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:21:36Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:21:36Z"
+  name: install-j7l5w-zpfsm
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: dff4ea4b-0f12-424d-81a7-736fd94720c3
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: The number of etcd nodes must be odd to maintain quorum. The current
+        count is {{ .groups.etcd | len }}. Please adjust your inventory so that the
+        etcd group contains an odd number of hosts.
+      that: (mod (.groups.etcd | len) 2) | eq 1
+    name: assert
+  name: Inventory | Fail if the number of etcd hosts is even
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .groups.etcd | empty | not }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

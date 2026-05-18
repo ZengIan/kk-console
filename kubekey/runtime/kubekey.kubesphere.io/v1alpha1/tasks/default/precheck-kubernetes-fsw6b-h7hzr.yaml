@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T17:51:40Z"
+  generateName: precheck-kubernetes-fsw6b-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:register_type: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T17:51:40Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T17:51:40Z"
+  name: precheck-kubernetes-fsw6b-h7hzr
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-fsw6b
+    uid: 354caef4-28c0-4478-9fda-1913abf2973a
+  resourceVersion: "3"
+  uid: 119f81e5-7beb-4cb0-a5f6-683bd693c9ff
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: etcd --version
+    name: command
+  name: Defaults | Get installed etcd version
+  register: etcd_install_version
+  register_type: yaml
+  when:
+  - '{{ .groups.etcd | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

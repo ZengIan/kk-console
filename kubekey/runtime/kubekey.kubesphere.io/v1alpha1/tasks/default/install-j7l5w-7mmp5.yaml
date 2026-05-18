@@ -1,0 +1,69 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/repository
+  creationTimestamp: "2026-05-17T20:22:12Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:22:12Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:22:16Z"
+  name: install-j7l5w-7mmp5
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: d3b26633-ae9a-4e3f-b7ad-61e240c3177e
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |-
+      if [ -f "{{ .tmp_dir }}/repository.iso" ]; then
+        umount {{ .tmp_dir }}/iso
+      fi
+    name: command
+  name: Repository | Unmount repository ISO from temporary directory
+  when:
+  - '{{or (.groups.k8s_cluster | default list | has .inventory_hostname) (.groups.image_registry
+    | default list | has .inventory_hostname)}}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+  phase: Success

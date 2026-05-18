@@ -1,0 +1,65 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: .
+  creationTimestamp: "2026-05-17T17:21:40Z"
+  generateName: host-check-qw5xm-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T17:21:40Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T17:22:34Z"
+  name: host-check-qw5xm-n7bj5
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: host-check-qw5xm
+    uid: 8edde925-4c45-44cc-83e6-90543892bf32
+  resourceVersion: "3"
+  uid: fa0ee478-d03e-4577-9ba6-5e5ff791aa7a
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: {}
+    name: setup
+  name: get host info
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

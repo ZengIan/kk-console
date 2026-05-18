@@ -1,0 +1,165 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/repository
+  creationTimestamp: "2026-05-17T20:22:05Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:22:05Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:22:12Z"
+  name: install-j7l5w-fkkmc
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: 3a7e4ff9-26ab-4d52-87bf-87d28892e255
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      now=$(date +"%Y%m%d%H%M%S")
+      PKGS="socat conntrack ipset ebtables chrony ipvsadm{{ if .groups.nfs | default list | has .inventory_hostname }} nfs-kernel-server{{ end }}"
+      PKGS_TO_INSTALL=""
+      for pkg in $PKGS; do
+        if [ -n "$pkg" ]; then
+          case "$pkg" in
+            socat)
+              command -v socat >/dev/null 2>&1 || PKGS_TO_INSTALL="$PKGS_TO_INSTALL socat"
+              ;;
+            conntrack)
+              command -v conntrack >/dev/null 2>&1 || PKGS_TO_INSTALL="$PKGS_TO_INSTALL conntrack"
+              ;;
+            ipset)
+              ipset list >/dev/null 2>&1 || PKGS_TO_INSTALL="$PKGS_TO_INSTALL ipset"
+              ;;
+            ebtables)
+              ebtables -L >/dev/null 2>&1 || PKGS_TO_INSTALL="$PKGS_TO_INSTALL ebtables"
+              ;;
+            chrony)
+              [ "$(systemctl show -p LoadState --value chrony.service 2>/dev/null)" = "loaded" ] \
+                || PKGS_TO_INSTALL="$PKGS_TO_INSTALL chrony"
+              ;;
+            ipvsadm)
+              ipvsadm -Ln >/dev/null 2>&1 || PKGS_TO_INSTALL="$PKGS_TO_INSTALL ipvsadm"
+              ;;
+            nfs-kernel-server)
+              [ "$(systemctl show -p LoadState --value nfs-server.service 2>/dev/null)" = "loaded" ] \
+                || PKGS_TO_INSTALL="$PKGS_TO_INSTALL nfs-kernel-server"
+              ;;
+          esac
+        fi
+      done
+      if [ -f "{{ .tmp_dir }}/iso" ]; then
+        # Backup current APT sources
+        mv /etc/apt/sources.list /etc/apt/sources.list.kubekey-$now.bak
+        mv /etc/apt/sources.list.d /etc/apt/sources.list.d.kubekey-$now.bak
+        mkdir -p /etc/apt/sources.list.d
+        # Configure local repository
+        rm -rf /etc/apt/sources.list.d/*
+        echo 'deb [trusted=yes] file://{{ .tmp_dir }}/iso /' > /etc/apt/sources.list.d/kubekey.list
+        # Update package index
+        apt-get update
+        # Install missing packages
+        if [ -n "$PKGS_TO_INSTALL" ]; then
+          apt install -y $PKGS_TO_INSTALL
+        fi
+        # Restore original APT sources
+        rm -rf /etc/apt/sources.list.d
+        mv /etc/apt/sources.list.kubekey.bak-$now /etc/apt/sources.list
+        mv /etc/apt/sources.list.d.kubekey.bak-$now /etc/apt/sources.list.d
+      else
+        # No local ISO found, using default repositories
+        apt-get update
+        if [ -n "$PKGS_TO_INSTALL" ]; then
+          apt install -y $PKGS_TO_INSTALL
+        fi
+      fi
+    name: command
+  name: Repository | Initialize Debian-based repository and install required system
+    packages
+  when:
+  - '{{or (.groups.k8s_cluster | default list | has .inventory_hostname) (.groups.image_registry
+    | default list | has .inventory_hostname)}}'
+  - '{{ .current_host_type | trim | eq "ubuntu" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: "0% [Working]\r            \rHit:1 http://mirrors.cloud.aliyuncs.com/ubuntu
+        noble InRelease\r\r\n\r0% [Waiting for headers] [Connecting to download.\r
+        \                                                \rHit:2 http://mirrors.cloud.aliyuncs.com/ubuntu
+        noble-updates InRelease\r\r\n\r                                                 \rHit:3
+        http://mirrors.cloud.aliyuncs.com/ubuntu noble-backports InRelease\r\r\n\r
+        \                                                \rHit:4 http://mirrors.cloud.aliyuncs.com/ubuntu
+        noble-security InRelease\r\r\n\r0% [Connected to download.docker.com (13.226.209.\r
+        \                                                \rHit:5 https://download.docker.com/linux/ubuntu
+        noble InRelease\r\r\n\r                                                 \r0%
+        [Waiting for headers]\r                        \rHit:6 https://deb.nodesource.com/node_18.x
+        nodistro InRelease\r\r\n\r                        \r0% [Working]\r0% [Working]\r0%
+        [Working]\r0% [Working]\r0% [Working]\r0% [Working]\r20% [Working]\r             \r\rReading
+        package lists... 0%\r\rReading package lists... 0%\r\rReading package lists...
+        0%\r\rReading package lists... 2%\r\rReading package lists... 2%\r\rReading
+        package lists... 4%\r\rReading package lists... 4%\r\rReading package lists...
+        4%\r\rReading package lists... 4%\r\rReading package lists... 4%\r\rReading
+        package lists... 4%\r\rReading package lists... 34%\r\rReading package lists...
+        34%\r\rReading package lists... 35%\r\rReading package lists... 47%\r\rReading
+        package lists... 47%\r\rReading package lists... 48%\r\rReading package lists...
+        48%\r\rReading package lists... 48%\r\rReading package lists... 48%\r\rReading
+        package lists... 53%\r\rReading package lists... 53%\r\rReading package lists...
+        56%\r\rReading package lists... 56%\r\rReading package lists... 63%\r\rReading
+        package lists... 63%\r\rReading package lists... 69%\r\rReading package lists...
+        69%\r\rReading package lists... 74%\r\rReading package lists... 74%\r\rReading
+        package lists... 75%\r\rReading package lists... 75%\r\rReading package lists...
+        75%\r\rReading package lists... 75%\r\rReading package lists... 75%\r\rReading
+        package lists... 75%\r\rReading package lists... 75%\r\rReading package lists...
+        75%\r\rReading package lists... 75%\r\rReading package lists... 75%\r\rReading
+        package lists... 76%\r\rReading package lists... 76%\r\rReading package lists...
+        76%\r\rReading package lists... 76%\r\rReading package lists... 76%\r\rReading
+        package lists... 76%\r\rReading package lists... 76%\r\rReading package lists...
+        76%\r\rReading package lists... 79%\r\rReading package lists... 79%\r\rReading
+        package lists... 82%\r\rReading package lists... 82%\r\rReading package lists...
+        89%\r\rReading package lists... 89%\r\rReading package lists... 95%\r\rReading
+        package lists... 95%\r\rReading package lists... 98%\r\rReading package lists...
+        98%\r\rReading package lists... 99%\r\rReading package lists... 99%\r\rReading
+        package lists... 99%\r\rReading package lists... 99%\r\rReading package lists...
+        99%\r\rReading package lists... 99%\r\rReading package lists... 99%\r\rReading
+        package lists... 99%\r\rReading package lists... 99%\r\rReading package lists...
+        99%\r\rReading package lists... Done"
+  phase: Success

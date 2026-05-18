@@ -1,0 +1,67 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:44:37Z"
+  generateName: install-7dxb4-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:binary_type: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:44:37Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:44:37Z"
+  name: install-7dxb4-4k86n
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-7dxb4
+    uid: 976c799c-1b5b-4eba-842f-9da28f053e55
+  resourceVersion: "3"
+  uid: 9a3e5de3-b197-48bf-9263-b2ec52b5b60a
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args:
+      binary_type: '{{- if .transform_architectures.amd64 | has .os.architecture -}}
+        amd64 {{- else if .transform_architectures.arm64 | has .os.architecture -}}
+        arm64 {{- end -}}'
+    name: set_fact
+  name: Defaults | Determine operating system architecture for each node
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

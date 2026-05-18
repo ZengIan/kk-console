@@ -1,0 +1,66 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T18:10:23Z"
+  generateName: install-pdg24-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T18:10:23Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T18:10:23Z"
+  name: install-pdg24-hdlbd
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-pdg24
+    uid: 059d5cb2-ba8b-4d75-bc6d-970534ef18f3
+  resourceVersion: "3"
+  uid: 0031ebe6-5cc3-4b57-9989-ddcf9b8ed7dd
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args: |
+      if [ -d {{ .tmp_dir }} ]; then
+        rm -rf {{ .tmp_dir }}
+      fi
+      mkdir -m 777 -p {{ .tmp_dir }}
+    name: command
+  name: Defaults | Reset temporary directory
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+  phase: Success

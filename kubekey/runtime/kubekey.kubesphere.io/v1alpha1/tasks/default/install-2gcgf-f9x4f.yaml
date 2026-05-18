@@ -1,0 +1,70 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T19:06:05Z"
+  generateName: install-2gcgf-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:06:05Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:06:05Z"
+  name: install-2gcgf-f9x4f
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-2gcgf
+    uid: 5fed67f6-13b2-46eb-8678-ea26f0dacba5
+  resourceVersion: "3"
+  uid: fb11fa03-7b87-468d-8636-23e6f3c50890
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  ignoreError: true
+  loop: null
+  module:
+    args: kubelet --version
+    name: command
+  name: Defaults | Get installed Kubernetes version
+  register: kubernetes_install_version
+  when:
+  - '{{ .groups.k8s_cluster | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: localhost
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

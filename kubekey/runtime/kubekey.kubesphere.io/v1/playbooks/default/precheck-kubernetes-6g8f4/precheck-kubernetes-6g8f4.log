@@ -1,0 +1,93 @@
+
+
+ _   __      _          _   __           
+| | / /     | |        | | / /           
+| |/ / _   _| |__   ___| |/ /  ___ _   _ 
+|    \| | | | '_ \ / _ \    \ / _ \ | | |
+| |\  \ |_| | |_) |  __/ |\  \  __/ |_| |
+\_| \_/\__,_|_.__/ \___\_| \_/\___|\__, |
+                                    __/ |
+                                   |___/
+
+04:12:00 CST [Playbook default/precheck-kubernetes-6g8f4] start
+04:12:01 CST gather_facts
+[47-253-179-114] success
+04:12:21 CST [roles/native/root] OS | Add sudo secure path
+[47-253-179-114] success
+04:12:26 CST gather_facts
+[47-253-179-114] success
+04:12:41 CST [roles/defaults] Defaults | Reset temporary directory
+[47-253-179-114] success
+04:12:45 CST [roles/defaults] Defaults | Load version-specific settings for Kubernetes
+[47-253-179-114] success
+04:12:45 CST [roles/defaults] Defaults | Load default templates download
+[47-253-179-114] success
+04:12:51 CST [roles/defaults] Defaults | Determine operating system architecture for each node
+[47-253-179-114] success
+04:12:51 CST [roles/defaults] Defaults | Get kubelet.service LoadState
+[47-253-179-114] success
+04:12:56 CST [roles/defaults] Defaults | Get kubelet.service ActiveState
+[47-253-179-114] success
+04:13:00 CST [roles/defaults] Defaults | Get installed Kubernetes version
+[47-253-179-114] ignore 
+04:13:08 CST [roles/defaults] Defaults | Get etcd.service LoadState and save to variable
+[47-253-179-114] success
+04:13:12 CST [roles/defaults] Defaults | Get etcd.service ActiveState and save to variable
+[47-253-179-114] success
+04:13:16 CST [roles/defaults] Defaults | Get installed etcd version
+[47-253-179-114] ignore 
+04:13:21 CST [roles/defaults] Defaults | Select the initialization node for the cluster
+[47-253-179-114] success
+04:13:22 CST [roles/precheck/inventory] Inventory | Kubernetes groups must not be empty
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/inventory] Inventory | etcd group must not be empty
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/inventory] Inventory | Fail if the number of etcd hosts is even
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/image-registry/network] Cert | Copy check shell
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/image-registry/network] Cert | Set cert check command
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/image-registry/network] Cert | Exec check shell with input certs
+[47-253-179-114] skip   
+04:13:22 CST [roles/precheck/image-registry/network] Cert | Exec check shell with local certs
+[47-253-179-114] skip   
+04:13:23 CST [roles/precheck/image-registry/network] Cert | Set auth ca
+[47-253-179-114] skip   
+04:13:23 CST [roles/precheck/artifact] Artifact | Validate artifact file extension
+[47-253-179-114] skip   
+04:13:23 CST [roles/precheck/artifact] Artifact | Verify artifact MD5 checksum
+[47-253-179-114] skip   
+04:13:23 CST [roles/precheck/cri] CRI | Fail if container manager is not docker or containerd
+[47-253-179-114] skip   
+04:13:23 CST [roles/precheck/cri] CRI | Validate minimum required containerd version
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/cni] CNI | Set calico version from config or defaults
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/cni] CNI | Validate calico version is allowed for the selected Kubernetes version
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/cni] CNI | Validate cilium version is allowed for the selected Kubernetes version
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/cni] CNI | Validate kubeovn version is allowed for the selected Kubernetes version
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/cni] CNI | Ensure Spiderpool is only configured alongside Calico or Cilium networking plugins
+[47-253-179-114] skip   
+04:13:24 CST [roles/precheck/storageclass] StorageClass | Fail if localpv provisioner version is unsupported
+[47-253-179-114] skip   
+04:13:25 CST [roles/precheck/os] OS | Validate inventory hostname is RFC-compliant
+[47-253-179-114] success
+04:13:25 CST [roles/precheck/os] OS | Validate current host system hostname is RFC-compliant
+[47-253-179-114] skip   
+04:13:25 CST [roles/precheck/os] OS | Fail if operating system is not supported
+[47-253-179-114] success
+04:13:25 CST [roles/precheck/os] OS | Fail if architecture is not supported
+[47-253-179-114] success
+04:13:25 CST [roles/precheck/os] OS | Fail if master node memory is insufficient
+[47-253-179-114] success
+04:13:26 CST [roles/precheck/os] OS | Fail if worker node memory is insufficient
+[47-253-179-114] success
+04:13:26 CST [roles/precheck/os] OS | Fail if kernel version is too old
+[47-253-179-114] success
+04:13:26 CST [roles/precheck/network] Network | Ensure either internal_ipv4 or internal_ipv6 is defined
+[47-253-179-114] success
+04:13:26 CST [roles/precheck/network] Network | Ensure required network interfaces are present

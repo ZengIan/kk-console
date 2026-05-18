@@ -1,0 +1,73 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/artifact
+  creationTimestamp: "2026-05-17T19:42:00Z"
+  generateName: precheck-kubernetes-w62fx-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:42:00Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:42:00Z"
+  name: precheck-kubernetes-w62fx-lbkxz
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-w62fx
+    uid: d2ce7bae-0829-4c51-ade4-10e84f0edba3
+  resourceVersion: "3"
+  uid: 8c5e3c64-3112-4bbd-9d41-9a30f827a1df
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      actual_md5=$(md5sum {{ .download.artifact_file }} | awk '{print $1}')
+      if [[ "$actual_md5" != "{{ .download.artifact_md5 }}" ]]; then
+        echo "Error: MD5 checksum mismatch for '{{ .download.artifact_file }}'. Expected '{{ .download.artifact_md5 }}', got '$actual_md5'."
+        exit 1
+      fi
+    name: command
+  name: Artifact | Verify artifact MD5 checksum
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{.download.artifact_md5 | empty | not}}'
+  - '{{.download.artifact_file | empty | not}}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

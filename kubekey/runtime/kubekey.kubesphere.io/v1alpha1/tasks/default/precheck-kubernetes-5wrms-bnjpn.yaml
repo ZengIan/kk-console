@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/defaults
+  creationTimestamp: "2026-05-17T20:06:49Z"
+  generateName: precheck-kubernetes-5wrms-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:ignoreError: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:06:49Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:06:53Z"
+  name: precheck-kubernetes-5wrms-bnjpn
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-5wrms
+    uid: f77fc1b4-abb9-47e6-8f66-79ebbb7db5c9
+  resourceVersion: "3"
+  uid: 2ec4d97f-ef59-4c2d-81ad-f488c7f52fa3
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  ignoreError: true
+  loop: null
+  module:
+    args: kubelet --version
+    name: command
+  name: Defaults | Get installed Kubernetes version
+  register: kubernetes_install_version
+  when:
+  - '{{ .groups.k8s_cluster | has .inventory_hostname }}'
+status:
+  hostResults:
+  - error: module run failed
+    host: 47-253-179-114
+    loopResults:
+    - error: Process exited with status 127
+      item: null
+      stdout: '/bin/bash: line 1: kubelet: command not found'
+  phase: Ignored

@@ -1,0 +1,75 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/artifact
+  creationTimestamp: "2026-05-17T19:59:54Z"
+  generateName: precheck-kubernetes-xvgbp-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:59:54Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:59:54Z"
+  name: precheck-kubernetes-xvgbp-hp6v4
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-xvgbp
+    uid: 8e47e037-fab5-4d53-abaf-a2610fb976de
+  resourceVersion: "3"
+  uid: 0eb1ee9f-72df-485c-bbac-1aea1275c1f4
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: Artifact file '{{ .download.artifact_file }}' does not have the required
+        extension '.tgz' or '.tar.gz'.
+      that:
+      - .download.artifact_file | fileExists
+      - or (.download.artifact_file | hasSuffix ".tgz") (.download.artifact_file |
+        hasSuffix ".tar.gz")
+    name: assert
+  name: Artifact | Validate artifact file extension
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{.download.artifact_file | empty | not}}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

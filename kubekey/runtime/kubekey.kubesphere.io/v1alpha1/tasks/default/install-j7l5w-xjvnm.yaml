@@ -1,0 +1,103 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/ntp
+  creationTimestamp: "2026-05-17T20:22:16Z"
+  generateName: install-j7l5w-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:22:16Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:22:22Z"
+  name: install-j7l5w-xjvnm
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-j7l5w
+    uid: 4c66d514-df22-41f0-bd1c-723ae58e20e9
+  resourceVersion: "3"
+  uid: c7865bae-2e19-40f2-af80-e6b75a8c4eb6
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      # Determine the correct chrony configuration file based on OS type
+      chronyConfigFile={{ if or (.os.release.ID | eq "ubuntu") (.os.release.ID_LIKE | eq "debian") }}"/etc/chrony/chrony.conf"{{ else }}"/etc/chrony.conf"{{ end }}
+
+      # Remove any existing server, allow, or local entries to ensure a clean configuration
+      sed -i '/^server/d' $chronyConfigFile
+      sed -i 's/^pool /#pool /g' $chronyConfigFile
+      sed -i '/^allow/d' $chronyConfigFile
+      sed -i '/^local/d' $chronyConfigFile
+
+      # Add base configuration to allow all clients and set local stratum
+      echo "allow 0.0.0.0/0" >> $chronyConfigFile
+      echo "allow ::/0" >> $chronyConfigFile
+      echo "local stratum 10" >> $chronyConfigFile
+
+      # Add NTP server entries
+      {{- range $server := .native.ntp.servers }}
+        {{- $internalIPv4 := "" }}
+        {{- $internalIPv6 := "" }}
+        {{- range $.hostvars }}
+          {{- if eq .hostname $server }}
+            {{- $internalIPv4 = .internal_ipv4 | default "" }}
+            {{- $internalIPv6 = .internal_ipv6 | default "" }}
+          {{- end }}
+        {{- end }}
+      # Configuring NTP server: {{ $server }}
+        {{- if $internalIPv4 | empty | not }}
+      grep -q '^server {{ $internalIPv4 }} iburst' $chronyConfigFile || sed '1a server {{ $internalIPv4 }} iburst' -i $chronyConfigFile
+        {{- end }}
+        {{- if $internalIPv6 | empty | not }}
+      grep -q '^server {{ $internalIPv6 }} iburst' $chronyConfigFile || sed '1a server [{{ $internalIPv6 }}] iburst' -i $chronyConfigFile
+        {{- end }}
+        {{- if and ($internalIPv4 | empty) ($internalIPv6 | empty) }}
+      grep -q '^server {{ $server }} iburst' $chronyConfigFile || sed '1a server {{ $server }} iburst' -i $chronyConfigFile
+        {{- end }}
+      {{- end }}
+    name: command
+  name: NTP | Configure NTP server
+  when:
+  - '{{or (.groups.k8s_cluster | default list | has .inventory_hostname) (.groups.image_registry
+    | default list | has .inventory_hostname)}}'
+  - '{{.native.ntp.enabled}}'
+  - '{{.native.ntp.servers | empty | not}}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+  phase: Success

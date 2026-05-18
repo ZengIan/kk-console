@@ -1,0 +1,74 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/image-registry/network
+  creationTimestamp: "2026-05-17T17:51:41Z"
+  generateName: precheck-kubernetes-fsw6b-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:register: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T17:51:41Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T17:51:41Z"
+  name: precheck-kubernetes-fsw6b-hhwrs
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-fsw6b
+    uid: 354caef4-28c0-4478-9fda-1913abf2973a
+  resourceVersion: "3"
+  uid: 27791fd4-ff20-41f0-9704-604e938026cc
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      if /etc/kubekey/scripts/check.sh {{ .image_registry.auth.registry | splitList "/" | first }} --ca-file {{ .binary_dir }}/pki/root.crt --cert-file {{ .binary_dir }}/pki/image_registry.crt --key-file {{ .binary_dir }}/pki/image_registry.key ; then
+          echo "true"
+      else
+          echo "false"
+      fi
+    name: command
+  name: Cert | Exec check shell with local certs
+  register: cert_check_self_cert_result
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .cert_check_input_cert_result.stdout | eq "false" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

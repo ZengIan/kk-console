@@ -1,0 +1,68 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: .
+  creationTimestamp: "2026-05-17T20:06:09Z"
+  generateName: host-check-bv4lb-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:06:09Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:06:09Z"
+  name: host-check-bv4lb-flx6b
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: host-check-bv4lb
+    uid: 39cf2f73-277b-4a99-ae5d-6044e12c3817
+  resourceVersion: "3"
+  uid: ee435cad-d136-40a8-b51c-e3d6c8a3af0f
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      {{- range $k,$v := .hostvars }}
+      {{ $k }}:
+        arch: "{{ if $.architectures.amd64 | has ($v.os.architecture | default "") }}amd64{{ else if $.architectures.arm64 | has ($v.os.architecture | default "") }}arm64{{ else }}{{ $v.os.architecture | default "" }}{{ end }}"
+        hostname: "{{ $v.os.hostname | default "" }}"
+      {{- end }}
+    name: result
+  name: set result
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

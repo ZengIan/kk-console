@@ -1,0 +1,107 @@
+apiVersion: kubekey.kubesphere.io/v1
+kind: Inventory
+metadata:
+  annotations:
+    playbook.kubekey.kubesphere.io/host-check: host-check-5dvwz
+  creationTimestamp: "2026-05-17T19:53:36Z"
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:playbook.kubekey.kubesphere.io/host-check: {}
+      f:spec:
+        f:groups:
+          .: {}
+          f:all:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+          f:etcd:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+          f:image_registry:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+          f:k8s_cluster:
+            .: {}
+            f:groups: {}
+            f:hosts: {}
+            f:vars: {}
+          f:kube_control_plane:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+          f:kube_worker:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+          f:nfs:
+            .: {}
+            f:hosts: {}
+            f:vars: {}
+        f:hosts:
+          f:47-253-179-114:
+            .: {}
+            f:arch: {}
+            f:archLocked: {}
+            f:connector:
+              .: {}
+              f:host: {}
+              f:password: {}
+              f:port: {}
+              f:user: {}
+            f:internal_ipv4: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:23:55Z"
+  name: default
+  namespace: default
+  resourceVersion: "30"
+  uid: d54a808f-b42d-49fc-843e-2a673918d1f3
+spec:
+  groups:
+    all:
+      hosts:
+      - 47-253-179-114
+      vars: null
+    etcd:
+      hosts:
+      - 47-253-179-114
+      vars: null
+    image_registry:
+      hosts: []
+      vars: null
+    k8s_cluster:
+      groups:
+      - kube_control_plane
+      - kube_worker
+      hosts: []
+      vars: null
+    kube_control_plane:
+      hosts:
+      - 47-253-179-114
+      vars: null
+    kube_worker:
+      hosts:
+      - 47-253-179-114
+      vars: null
+    nfs:
+      hosts: []
+      vars: null
+  hosts:
+    47-253-179-114:
+      arch: amd64
+      archLocked: true
+      connector:
+        host: 47.253.179.114
+        password: Zcx123!!/.
+        port: "22"
+        user: root
+      internal_ipv4: 172.18.16.233
+  vars: null
+status: {}

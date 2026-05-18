@@ -1,0 +1,54 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  creationTimestamp: "2026-05-17T16:52:22Z"
+  generateName: install-pdfm6-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:name: {}
+        f:name: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T16:52:22Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T16:52:22Z"
+  name: install-pdfm6-78dfh
+  namespace: default
+  resourceVersion: "3"
+  uid: f22af651-389f-441f-99e4-3fc3f4f8692a
+spec:
+  DelegateTo: ""
+  hosts:
+  - localhost
+  loop: null
+  module:
+    args: null
+    name: setup
+  name: gather_facts
+status:
+  hostResults:
+  - error: module run failed
+    host: localhost
+    loopResults:
+    - error: 'failed to get kernel: exit status 1, stderr: "[sudo] password for zengcx:
+        \nsudo: no password was provided\nsudo: a password is required\n": exit status
+        1'
+      item: null
+      stdErr: failed to get host info
+      stdout: failed
+  phase: Failed

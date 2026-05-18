@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/network
+  creationTimestamp: "2026-05-17T20:13:26Z"
+  generateName: precheck-kubernetes-6g8f4-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:13:26Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:13:26Z"
+  name: precheck-kubernetes-6g8f4-b9tcb
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-6g8f4
+    uid: 479fd769-a347-4b7f-9b09-8f35da707cbe
+  resourceVersion: "2"
+  uid: 5961746c-f088-49f1-897f-3d19a53d0b76
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args: |
+      {{- if .internal_ipv4 | empty | not }}
+      if ! ip -o addr show | grep -q {{ .internal_ipv4 }}; then
+        echo 'The specified IPv4 address is not assigned to any network interface.' >&2
+        exit 1
+      fi
+      {{- end }}
+      {{- if .internal_ipv6 | empty | not }}
+      if ! ip -o addr show | grep -q {{ .internal_ipv6 }}; then
+        echo 'The specified IPv6 address is not assigned to any network interface.' >&2
+        exit 1
+      fi
+      {{- end }}
+    name: command
+  name: Network | Ensure required network interfaces are present
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+status:
+  phase: Running

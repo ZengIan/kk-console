@@ -1,0 +1,139 @@
+# Generate by variable
+remote:
+    os:
+        architecture: x86_64
+        hostname: 47-253-179-114
+        kernel_version: 6.8.0-63-generic
+        release:
+            BUG_REPORT_URL: '"https://bugs.launchpad.net/ubuntu/"'
+            HOME_URL: '"https://www.ubuntu.com/"'
+            ID: ubuntu
+            ID_LIKE: debian
+            LOGO: ubuntu-logo
+            NAME: '"Ubuntu"'
+            PRETTY_NAME: '"Ubuntu 24.04.2 LTS"'
+            PRIVACY_POLICY_URL: '"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"'
+            SUPPORT_URL: '"https://help.ubuntu.com/"'
+            UBUNTU_CODENAME: noble
+            VERSION: '"24.04.2 LTS (Noble Numbat)"'
+            VERSION_CODENAME: noble
+            VERSION_ID: '"24.04"'
+        type: Linux
+    process:
+        cpuInfo:
+            - address sizes: 46 bits physical, 48 bits virtual
+              apicid: "0"
+              bogomips: "5000.00"
+              bugs: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit mmio_stale_data retbleed gds bhi
+              cache size: 33792 KB
+              cache_alignment: "64"
+              clflush size: "64"
+              core id: "0"
+              cpu MHz: "2500.000"
+              cpu cores: "1"
+              cpu family: "6"
+              cpuid level: "22"
+              flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch pti fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap clflushopt clwb avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves arat
+              fpu: "yes"
+              fpu_exception: "yes"
+              initial apicid: "0"
+              microcode: "0x1"
+              model: "85"
+              model name: Intel(R) Xeon(R) Platinum
+              physical id: "0"
+              power management: ""
+              processor: "0"
+              siblings: "2"
+              stepping: "4"
+              vendor_id: GenuineIntel
+              wp: "yes"
+            - address sizes: 46 bits physical, 48 bits virtual
+              apicid: "1"
+              bogomips: "5000.00"
+              bugs: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit mmio_stale_data retbleed gds bhi
+              cache size: 33792 KB
+              cache_alignment: "64"
+              clflush size: "64"
+              core id: "0"
+              cpu MHz: "2500.000"
+              cpu cores: "1"
+              cpu family: "6"
+              cpuid level: "22"
+              flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch pti fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap clflushopt clwb avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves arat
+              fpu: "yes"
+              fpu_exception: "yes"
+              initial apicid: "1"
+              microcode: "0x1"
+              model: "85"
+              model name: Intel(R) Xeon(R) Platinum
+              physical id: "0"
+              power management: ""
+              processor: "1"
+              siblings: "2"
+              stepping: "4"
+              vendor_id: GenuineIntel
+              wp: "yes"
+        memInfo:
+            Active: 234420 kB
+            Active(anon): 141108 kB
+            Active(file): 93312 kB
+            AnonHugePages: 0 kB
+            AnonPages: 305660 kB
+            Bounce: 0 kB
+            Buffers: 11768 kB
+            Cached: 219368 kB
+            CommitLimit: 825904 kB
+            Committed_AS: 1820776 kB
+            DirectMap1G: 0 kB
+            DirectMap2M: 1835008 kB
+            DirectMap4k: 161052 kB
+            Dirty: 544 kB
+            FileHugePages: 0 kB
+            FilePmdMapped: 0 kB
+            HardwareCorrupted: 0 kB
+            HugePages_Free: "0"
+            HugePages_Rsvd: "0"
+            HugePages_Surp: "0"
+            HugePages_Total: "0"
+            Hugepagesize: 2048 kB
+            Hugetlb: 0 kB
+            Inactive: 273476 kB
+            Inactive(anon): 147108 kB
+            Inactive(file): 126368 kB
+            KReclaimable: 25124 kB
+            KernelStack: 4832 kB
+            Mapped: 184472 kB
+            MemAvailable: 1039828 kB
+            MemFree: 937712 kB
+            MemTotal: 1651808 kB
+            Mlocked: 27284 kB
+            NFS_Unstable: 0 kB
+            PageTables: 8984 kB
+            Percpu: 2376 kB
+            SReclaimable: 25124 kB
+            SUnreclaim: 67268 kB
+            SecPageTables: 0 kB
+            Shmem: 2704 kB
+            ShmemHugePages: 0 kB
+            ShmemPmdMapped: 0 kB
+            Slab: 92392 kB
+            SwapCached: 0 kB
+            SwapFree: 0 kB
+            SwapTotal: 0 kB
+            Unaccepted: 0 kB
+            Unevictable: 28820 kB
+            VmallocChunk: 0 kB
+            VmallocTotal: 34359738367 kB
+            VmallocUsed: 21048 kB
+            Writeback: 0 kB
+            WritebackTmp: 0 kB
+            Zswap: 0 kB
+            Zswapped: 0 kB
+runtime:
+    architectures:
+        amd64:
+            - amd64
+            - x86_64
+        arm64:
+            - arm64
+            - aarch64

@@ -1,0 +1,73 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/os
+  creationTimestamp: "2026-05-17T19:36:45Z"
+  generateName: precheck-kubernetes-9744j-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:36:45Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:36:45Z"
+  name: precheck-kubernetes-9744j-rr8kq
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-9744j
+    uid: 972ba954-5048-4cd6-ad5a-44e09d4336b1
+  resourceVersion: "3"
+  uid: cb918f8e-83bf-4baf-9c2c-5587ff2e7ce1
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: The hostname "{{ .hostname }}" is invalid. Hostnames must use only
+        lowercase alphanumeric characters, '.', or '-', and must start and end with
+        an alphanumeric character.
+      that: .hostname | regexMatch "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+    name: assert
+  name: OS | Validate current host system hostname is RFC-compliant
+  when:
+  - '{{ .inventory_hostname | ne "localhost" }}'
+  - '{{ .native.set_hostname | not }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

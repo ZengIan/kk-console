@@ -1,0 +1,90 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/etcd/prepare
+  creationTimestamp: "2026-05-17T20:16:09Z"
+  generateName: install-dzxqf-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:hosts: {}
+            f:vars:
+              .: {}
+              f:installed_etcd: {}
+              f:need_installed_etcd: {}
+              f:need_uninstall_etcd: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:16:09Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:16:09Z"
+  name: install-dzxqf-2wvxw
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-dzxqf
+    uid: 6a2be465-0ba6-4e6a-ab84-ba95c503a3dd
+  resourceVersion: "3"
+  uid: 3bfa643b-ee47-48b6-a11b-aabc4f330119
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      hosts: all
+      vars:
+        installed_etcd: |-
+          {{- $installed := list -}} {{- range .groups.etcd -}}
+            {{- if and ((index $.hostvars . "etcd_install_LoadState" "stdout") | eq "loaded") ($.delete_nodes | default list | has . | not) -}}
+              {{- $installed = append $installed . -}}
+            {{- end -}}
+          {{- end -}} {{ $installed | first | default "" }}
+        need_installed_etcd: |-
+          {{- $needInstalled := list -}} {{- range .groups.etcd -}}
+            {{- if and ((index $.hostvars . "etcd_install_LoadState" "stdout") | eq "not-found") ($.delete_nodes | default list | has . | not) -}}
+              {{- $needInstalled = append $needInstalled . -}}
+            {{- end -}}
+          {{- end -}} {{ $needInstalled | toJson }}
+        need_uninstall_etcd: "{{- $needUnInstalled := list -}} {{- range .groups.etcd
+          -}}\n  {{- if $.delete_nodes | default list | has . -}}\n    {{- $needUnInstalled
+          = append $needUnInstalled . -}}\n  {{- end -}}\n{{- end -}} {{ $needUnInstalled
+          | toJson }}            "
+    name: add_hostvars
+  name: Prepare | Detect installed, to-install, and to-remove etcd nodes
+  when:
+  - '{{ .etcd.deployment_type | eq "external" }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: success
+  phase: Success

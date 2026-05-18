@@ -1,0 +1,75 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/precheck/inventory
+  creationTimestamp: "2026-05-17T19:41:59Z"
+  generateName: precheck-kubernetes-w62fx-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:module:
+          f:args:
+            f:fail_msg: {}
+            f:that: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T19:41:59Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T19:41:59Z"
+  name: precheck-kubernetes-w62fx-cnjch
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: precheck-kubernetes-w62fx
+    uid: d2ce7bae-0829-4c51-ade4-10e84f0edba3
+  resourceVersion: "3"
+  uid: 380a88a9-9910-450f-9821-1b540b9a18bb
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: null
+  module:
+    args:
+      fail_msg: The Kubernetes inventory groups "k8s_cluster" and "kube_control_plane"
+        must not be empty. Please ensure both groups are present and correctly specified
+        in your inventory file.
+      that:
+      - .groups.k8s_cluster | empty | not
+      - .groups.kube_control_plane | empty | not
+    name: assert
+  name: Inventory | Kubernetes groups must not be empty
+  when:
+  - '{{ .inventory_hostname | eq "localhost" }}'
+  - '{{ .kubernetes.kube_version | empty | not }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success

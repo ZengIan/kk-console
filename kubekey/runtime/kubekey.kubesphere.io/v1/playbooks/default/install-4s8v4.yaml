@@ -1,0 +1,141 @@
+apiVersion: kubekey.kubesphere.io/v1
+kind: Playbook
+metadata:
+  creationTimestamp: "2026-05-17T20:00:22Z"
+  generateName: install-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+      f:spec:
+        f:config:
+          f:spec:
+            f:cni:
+              .: {}
+              f:ipv4_mask_size: {}
+              f:ipv6_mask_size: {}
+              f:pod_cidr: {}
+              f:service_cidr: {}
+              f:type: {}
+            f:cri:
+              .: {}
+              f:container_manager: {}
+            f:image_registry:
+              .: {}
+              f:auth:
+                .: {}
+                f:insecure: {}
+                f:password: {}
+                f:registry: {}
+                f:username: {}
+              f:harbor:
+                .: {}
+                f:data_dir: {}
+              f:type: {}
+            f:kubernetes:
+              .: {}
+              f:cluster_name: {}
+              f:control_plane_endpoint:
+                .: {}
+                f:host: {}
+                f:kubelet:
+                  .: {}
+                  f:max_pods: {}
+                f:port: {}
+                f:type: {}
+              f:kube_version: {}
+            f:storage_class:
+              .: {}
+              f:nfs:
+                .: {}
+                f:default: {}
+                f:enabled: {}
+                f:path: {}
+                f:server: {}
+            f:work_dir: {}
+        f:inventoryRef:
+          .: {}
+          f:kind: {}
+          f:name: {}
+          f:namespace: {}
+        f:playbook: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:00:22Z"
+  - apiVersion: kubekey.kubesphere.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:failureMessage: {}
+        f:failureReason: {}
+        f:phase: {}
+        f:statistics:
+          f:failed: {}
+          f:ignored: {}
+          f:success: {}
+          f:total: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:01:57Z"
+  name: install-4s8v4
+  namespace: default
+  resourceVersion: "2"
+  uid: a4c16473-6e72-4f19-b0b1-083ac3106725
+spec:
+  config:
+    spec:
+      cni:
+        ipv4_mask_size: 24
+        ipv6_mask_size: 64
+        pod_cidr: 10.233.64.0/18
+        service_cidr: 10.233.0.0/18
+        type: calico
+      cri:
+        container_manager: containerd
+      image_registry:
+        auth:
+          insecure: true
+          password: Harbor12345
+          registry: harbor.rise.io
+          username: admin
+        harbor:
+          data_dir: /data/registry
+        type: harbor
+      kubernetes:
+        cluster_name: host-cluster
+        control_plane_endpoint:
+          host: lb.rise.io
+          kubelet:
+            max_pods: 110
+          port: 6443
+          type: local
+        kube_version: v1.29.15
+      storage_class:
+        nfs:
+          default: true
+          enabled: true
+          path: /data/share
+          server: 47.253.179.114
+      work_dir: /mnt/e/Openclaw/kk-console/kubekey
+  inventoryRef:
+    kind: Inventory
+    name: default
+    namespace: default
+  playbook: web-installer/kubernetes/playbooks/install.yaml
+  project: {}
+status:
+  failureMessage: "task [Network | Ensure required network interfaces are present](default/install-4s8v4-kw98x)
+    run failed: \n[47-253-179-114][executor]: module run failed\n[47-253-179-114][item=<nil>][0]:
+    \nstdout: The specified IPv4 address is not assigned to any network interface.\nstderr:
+    \nerror: Process exited with status 1\n"
+  failureReason: task executor failed
+  phase: Failed
+  result: null
+  statistics:
+    failed: 1
+    ignored: 3
+    success: 39
+    total: 43

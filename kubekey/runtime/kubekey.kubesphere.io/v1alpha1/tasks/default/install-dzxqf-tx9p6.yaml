@@ -1,0 +1,72 @@
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Task
+metadata:
+  annotations:
+    kubesphere.io/rel-path: roles/native/nfs
+  creationTimestamp: "2026-05-17T20:15:09Z"
+  generateName: install-dzxqf-
+  managedFields:
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubesphere.io/rel-path: {}
+        f:generateName: {}
+        f:ownerReferences: {}
+      f:spec:
+        f:hosts: {}
+        f:loop: {}
+        f:module:
+          f:args: {}
+          f:name: {}
+        f:name: {}
+        f:when: {}
+    manager: kk
+    operation: Update
+    time: "2026-05-17T20:15:09Z"
+  - apiVersion: kubekey.kubesphere.io/v1alpha1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:hostResults: {}
+        f:phase: {}
+    manager: kk
+    operation: Update
+    subresource: status
+    time: "2026-05-17T20:15:09Z"
+  name: install-dzxqf-tx9p6
+  namespace: default
+  ownerReferences:
+  - apiVersion: kubekey.kubesphere.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Playbook
+    name: install-dzxqf
+    uid: 6a2be465-0ba6-4e6a-ab84-ba95c503a3dd
+  resourceVersion: "3"
+  uid: 9d2fc073-898b-4a63-9f76-9399c506053b
+spec:
+  DelegateTo: ""
+  hosts:
+  - 47-253-179-114
+  loop: '{{ .nfs.share_dir | toJson }}'
+  module:
+    args: |
+      if [ ! -d {{ .item }} ]; then
+        mkdir -p {{ .item }}
+        chmod -R 0755 {{ .item }}
+        chown nobody:nobody {{ .item }}
+      fi
+    name: command
+  name: NFS | Ensure NFS share directories exist with correct permissions
+  when:
+  - '{{ .groups.nfs | default list | has .inventory_hostname }}'
+status:
+  hostResults:
+  - host: 47-253-179-114
+    loopResults:
+    - item: null
+      stdout: skip
+  phase: Success
